@@ -23,33 +23,42 @@ app.layout = html.Div([
     html.H1("Pseudo-Dome Pattern Generator with Parameters"),
     html.Div([
         html.Div([
-            html.Label("Radius (r):"),
-            dcc.Input(id='radius-input', type='number', value=5, min=1, step=0.1),
-            html.Label("Number of segments (n):"),
-            dcc.Input(id='segments-input', type='number', value=5, min=3, step=1),
-            html.Label("Mountain fold color:"),
-            dcc.Dropdown(id='mountain-color-input', options=color_options, value='red', clearable=False),
-            html.Label("Valley fold color:"),
-            dcc.Dropdown(id='valley-color-input', options=color_options, value='blue', clearable=False),
+            html.Div([
+                html.Label("Radius (r):"),
+                dcc.Input(id='radius-input', type='number', value=5, min=1, step=0.1)
+            ], style={'margin-bottom': '10px'}),
+            html.Div([
+                html.Label("Number of segments (n):"),
+                dcc.Input(id='segments-input', type='number', value=5, min=3, step=1)
+            ], style={'margin-bottom': '10px'}),
+            html.Label("Fold color 1:"),
+            dcc.Dropdown(id='fold-color-1-input', options=color_options, value='red', clearable=False),
+            html.Label("Fold color 2:"),
+            dcc.Dropdown(id='fold-color-2-input', options=color_options, value='blue', clearable=False),
             html.Label("Radial line color:"),
             dcc.Dropdown(id='radial-color-input', options=color_options, value='black', clearable=False),
-            html.Label("Mountain/Valley line width:"),
-            dcc.Input(id='mv-width-input', type='number', value=2, min=1, step=1),
-            html.Label("Radial line width:"),
-            dcc.Input(id='radial-width-input', type='number', value=1, min=1, step=1),
-            html.Button("Export SVG", id="export-button", n_clicks=0),
+            html.Div([
+                html.Label("Fold line width:"),
+            dcc.Input(id='fold-width-input', type='number', value=2, min=1, step=1)
+            ], style={'margin-bottom': '10px'}),
+            html.Div([
+                html.Label("Radial line width:"),
+            dcc.Input(id='radial-width-input', type='number', value=1, min=1, step=1)
+            ], style={'margin-bottom': '10px'}),
+            html.Div([
+                html.Button("Export SVG", id="export-button", n_clicks=0),
             dcc.Download(id="download-svg")
-        ]),
+            ], style={'margin-bottom': '10px'})
+        ], style={'width': '20%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             dcc.Graph(id='pattern-plot')
-        ], style={'width': '60%', 'display': 'inline-block', 'vertical-align': 'top'}),
+        ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             html.H3("Calculated Parameters:"),
             html.Pre(id='parameter-display')
-        ], style={'width': '35%', 'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '20px'})
-    ])
+        ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '10px'})
+    ], style={'display': 'flex', 'justify-content': 'space-between'})
 ])
-
 
 def calculate_parameters(r, n):
     theta1 = np.radians(180 / (n * (n + 1)))
@@ -86,15 +95,15 @@ def calculate_parameters(r, n):
     
     return thetas, s, A, beta, a, alpha, h, theta1, theta_l, CD, alpha[0][0], num_radial_segments
 
-def generate_pattern(r, n, mountain_color, valley_color, radial_color, mv_width, radial_width):
+def generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width):
     """
     Generate the pattern for the pseudo-dome.
     
     Args:
     r (float): Radius of the dome
     n (int): Number of segments
-    mountain_color (str): Color for mountain folds
-    valley_color (str): Color for valley folds
+    fold_color_1 (str): Color for mountain folds
+    fold_color_2 (str): Color for valley folds
     radial_color (str): Color for radial lines
     mv_width (float): Line width for mountain and valley folds
     radial_width (float): Line width for radial lines
@@ -118,7 +127,7 @@ def generate_pattern(r, n, mountain_color, valley_color, radial_color, mv_width,
             next_y = current_y + s[i] * np.sin(angle_factor * current_angle)
             
             # Draw the line
-            color = valley_color if inverse else mountain_color
+            color = fold_color_2 if inverse else fold_color_1
             traces.append(go.Scatter(x=[current_x, next_x], y=[current_y, next_y],
                                      mode='lines', line=dict(color=color, width=mv_width)))
             
@@ -155,9 +164,10 @@ def generate_pattern(r, n, mountain_color, valley_color, radial_color, mv_width,
                                  mode='lines', line=dict(color=color, width=mv_width)))
         
         # Generate radial lines
-        for i in range(1, len(points)):
-            traces.append(go.Scatter(x=[0, points[i][0]], y=[0, points[i][1]],
-                                     mode='lines', line=dict(color=radial_color, dash='dash', width=radial_width)))
+        if inverse:
+            for i in range(1, len(points)):
+                traces.append(go.Scatter(x=[0, points[i][0]], y=[0, points[i][1]],
+                                        mode='lines', line=dict(color=radial_color, dash='dash', width=radial_width)))
     
     # Generate both halves of the pattern
     generate_half_pattern()
@@ -184,22 +194,22 @@ def generate_pattern(r, n, mountain_color, valley_color, radial_color, mv_width,
      Output('parameter-display', 'children')],
     [Input('radius-input', 'value'),
      Input('segments-input', 'value'),
-     Input('mountain-color-input', 'value'),
-     Input('valley-color-input', 'value'),
+     Input('fold-color-1-input', 'value'),
+     Input('fold-color-2-input', 'value'),
      Input('radial-color-input', 'value'),
-     Input('mv-width-input', 'value'),
+     Input('fold-width-input', 'value'),
      Input('radial-width-input', 'value')]
 )
-
-def update_pattern(r, n, mountain_color, valley_color, radial_color, mv_width, radial_width):
+def update_pattern(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width):
+    
     """
     Callback function to update the pattern plot and parameter display.
     
     Args:
     r (float): Radius of the dome
     n (int): Number of segments
-    mountain_color (str): Color for mountain folds
-    valley_color (str): Color for valley folds
+    fold_color_1 (str): First color for folds
+    fold_color_2 (str): Seconds color for folds
     radial_color (str): Color for radial lines
     mv_width (float): Line width for mountain and valley folds
     radial_width (float): Line width for radial lines
@@ -211,7 +221,7 @@ def update_pattern(r, n, mountain_color, valley_color, radial_color, mv_width, r
         return go.Figure(), "Please enter valid values for r and n."
 
     thetas, s, A, beta, a, alpha, h, theta1, theta_l, CD, alpha11, num_radial_segments = calculate_parameters(r, n)
-    traces = generate_pattern(r, n, mountain_color, valley_color, radial_color, mv_width, radial_width)
+    traces = generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width)
 
     layout = go.Layout(
         showlegend=False,
@@ -224,39 +234,42 @@ def update_pattern(r, n, mountain_color, valley_color, radial_color, mv_width, r
     )
 
     figure = {'data': traces, 'layout': layout}
-
+    # Format folding angles in two aligned columns
+    folding_angles = "\n".join([f"α{i+1}1: {np.degrees(a1):6.2f}°    α{i+1}2: {np.degrees(a2):6.2f}°" 
+                                for i, (a1, a2) in enumerate(alpha)])
     param_display = f"""
-    r: {r}
-    n: {n}
-    θ1: {np.degrees(theta1):.2f}°
-    θl: {np.degrees(theta_l):.2f}°
-    CD: {np.degrees(CD):.2f}°
-    α11: {np.degrees(alpha11):.2f}°
-    Number of radial segments: {num_radial_segments}
+r: {r}
+n: {n}
+θ1: {np.degrees(theta1):.2f}°
+θl: {np.degrees(theta_l):.2f}°
+CD: {np.degrees(CD):.2f}°
+α11: {np.degrees(alpha11):.2f}°
 
-    Segment angles (θi):
-    {', '.join([f'{np.degrees(theta):.2f}°' for theta in thetas])}
+Number of radial segments: {num_radial_segments}
 
-    Segment lengths (si):
-    {', '.join([f'{length:.2f}' for length in s])}
+Segment angles (θi):
+{', '.join([f'{np.degrees(theta):.2f}°' for theta in thetas])}
 
-    β angles:
-    {', '.join([f'{np.degrees(angle):.2f}°' for angle in beta])}
+Segment lengths (si):
+{', '.join([f'{length:.2f}' for length in s])}
 
-    a lengths:
-    {', '.join([f'{length:.2f}' for length in a])}
+β angles:
+{', '.join([f'{np.degrees(angle):.2f}°' for angle in beta])}
 
-    Folding angles (αi1, αi2):
-    {', '.join([f'({np.degrees(a1):.2f}°, {np.degrees(a2):.2f}°)' for a1, a2 in alpha])}
+a lengths:
+{', '.join([f'{length:.2f}' for length in a])}
 
-    Heights (hi):
-    {', '.join([f'{height:.2f}' for height in h])}
-    """
+Folding angles (αi1, αi2):
+{folding_angles}
+
+Heights (hi):
+{', '.join([f'{height:.2f}' for height in h])}
+"""
 
     return figure, param_display
 
-def create_svg(r, n, mountain_color, valley_color, radial_color, mv_width, radial_width):
-    traces = generate_pattern(r, n, mountain_color, valley_color, radial_color, mv_width, radial_width)
+def create_svg(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width):
+    traces = generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width)
     
     svg_lines = [
         '<?xml version="1.0" encoding="UTF-8"?>',
@@ -283,18 +296,18 @@ def create_svg(r, n, mountain_color, valley_color, radial_color, mv_width, radia
     Input("export-button", "n_clicks"),
     [State('radius-input', 'value'),
      State('segments-input', 'value'),
-     State('mountain-color-input', 'value'),
-     State('valley-color-input', 'value'),
+     Input('fold-color-1-input', 'value'),
+     Input('fold-color-2-input', 'value'),
      State('radial-color-input', 'value'),
-     State('mv-width-input', 'value'),
+     State('fold-width-input', 'value'),
      State('radial-width-input', 'value')],
     prevent_initial_call=True
 )
-def export_svg(n_clicks, r, n, mountain_color, valley_color, radial_color, mv_width, radial_width):
+def export_svg(n_clicks, r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width):
     if n_clicks == 0:
         raise PreventUpdate
     
-    svg_string = create_svg(r, n, mountain_color, valley_color, radial_color, mv_width, radial_width)
+    svg_string = create_svg(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width)
     return dict(content=svg_string, filename="pseudo_dome_pattern.svg")
 
 if __name__ == '__main__':
