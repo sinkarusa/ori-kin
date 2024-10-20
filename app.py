@@ -91,7 +91,7 @@ def calculate_parameters(r, n):
     h.append(hl)
     
     # Calculate number of radial segments
-    num_radial_segments = int(round(360 / (2 * np.degrees(alpha[0][0]))))
+    num_radial_segments = int(round(360 / (2 * np.degrees(alpha[0][0]/2))))
     
     return thetas, s, A, beta, a, alpha, h, theta1, theta_l, CD, alpha[0][0], num_radial_segments
 
@@ -112,9 +112,9 @@ def generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, r
     list: List of Plotly scatter traces representing the pattern
     """
     thetas, s, A, beta, a, alpha, h, theta1, theta_l, CD, alpha11, num_radial_segments = calculate_parameters(r, n)
-    
+    # print(180*alpha[0][0]/np.pi)
     traces = []
-    
+    first_and_last_markers = []
     def generate_half_pattern(inverse=False):
         current_x, current_y = 0, 0
         current_angle = 0
@@ -164,10 +164,27 @@ def generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, r
                                  mode='lines', line=dict(color=color, width=mv_width)))
         
         # Generate radial lines
-        if inverse:
-            for i in range(1, len(points)):
-                traces.append(go.Scatter(x=[0, points[i][0]], y=[0, points[i][1]],
-                                        mode='lines', line=dict(color=radial_color, dash='dash', width=radial_width)))
+        
+        for i in range(1, len(points)):
+            traces.append(go.Scatter(x=[0, points[i][0]], y=[0, points[i][1]],
+                                    mode='lines', line=dict(color=radial_color, dash='dash', width=radial_width)))
+        # Add markers for the last point of the trace
+        # marker_x = next_x if i % 2 == 0 else current_x
+        # marker_y = next_y if i % 2 == 0 else current_y
+
+        # if inverse:
+        #      # Add a dot at the last point of the trace
+        #     traces.append(go.Scatter(x=[marker_x], y=[marker_y], mode='markers',
+        #                             marker=dict(color=color, size=10, symbol='x')))
+        # else:
+        #     traces.append(go.Scatter(x=[marker_x], y=[marker_y], mode='markers',
+        #                             marker=dict(
+        #                                 size=10,
+        #                                 symbol='circle',
+        #                                 line=dict(color=color, width=2),  # Outline color of the marker
+        #                                 color='rgba(0, 0, 0, 0)'  # Transparent fill inside the marker
+        #                             )))
+        # first_and_last_markers.append((marker_x,marker_y))
     
     # Generate both halves of the pattern
     generate_half_pattern()
@@ -175,18 +192,26 @@ def generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, r
     
     # Generate full radial pattern
     full_traces = traces.copy()
-    for i in range(1, num_radial_segments):
-        rotation = i * 2 * np.pi / num_radial_segments
+    
+    # import pdb; pdb.set_trace()
+    for i in range(1, int(num_radial_segments/2)):
+    # for i in range(0,1):
+        rotation = i * 2*alpha[0][0]
         rot_matrix = np.array([[np.cos(rotation), -np.sin(rotation)],
                                [np.sin(rotation), np.cos(rotation)]])
         
+
         for trace in traces:
-            x, y = trace['x'], trace['y']
+            x, y = np.array(trace['x']), np.array(trace['y'])
             rotated_points = np.dot(rot_matrix, [x, y])
-            full_traces.append(go.Scatter(x=rotated_points[0], y=rotated_points[1], mode='lines', 
-                                          line=dict(color=trace['line']['color'], dash=trace['line']['dash'],
-                                                    width=trace['line']['width'])))
-    
+            full_traces.append(go.Scatter(x=rotated_points[0], y=rotated_points[1], mode=trace['mode'],
+                                        line=trace['line'] if 'line' in trace else None,
+                                        marker=trace['marker'] if 'marker' in trace else None))
+
+            if i == int(num_radial_segments/2)-1:
+                if trace['mode'] == 'marker':
+                    first_and_last_markers.append((rotated_points[x][0],rotated_points[y][0]))
+    print(first_and_last_markers)
     return full_traces
 
 @app.callback(
