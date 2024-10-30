@@ -1,6 +1,7 @@
 [tool.poetry]
 name = "pseudo_dome_pattern_generator"
 version = "0.1.0"
+license = "GPL-3.0-or-later"
 description = ""
 authors = ["sinanus <sinankaraveli@gmail.com>"]
 readme = "README.md"
