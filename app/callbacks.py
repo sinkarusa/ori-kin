@@ -58,34 +58,35 @@ def register_callbacks(app):
         # Format folding angles in two aligned columns
         folding_angles = "\n".join([f"α{i+1}1: {np.degrees(a1):6.2f}°    α{i+1}2: {np.degrees(a2):6.2f}°" 
                                     for i, (a1, a2) in enumerate(alpha)])
-        param_display = f"""
-    r: {r}
-    n: {n}
-    θ1: {np.degrees(theta1):.2f}°
-    θl: {np.degrees(theta_l):.2f}°
-    CD: {np.degrees(CD):.2f}°
-    α11: {np.degrees(alpha11):.2f}°
+        param_display = \
+f"""
+r: {r}
+n: {n}
+θ1: {np.degrees(theta1):.2f}°
+θl: {np.degrees(theta_l):.2f}°
+CD: {np.degrees(CD):.2f}°
+α11: {np.degrees(alpha11):.2f}°
 
-    Number of radial segments: {num_radial_segments}
+Number of radial segments: {num_radial_segments}
 
-    Segment angles (θi):
-    {', '.join([f'{np.degrees(theta):.2f}°' for theta in thetas])}
+Segment angles (θi):
+{', '.join([f'{np.degrees(theta):.2f}°' for theta in thetas])}
 
-    Segment lengths (si):
-    {', '.join([f'{length:.2f}' for length in s])}
+Segment lengths (si):
+{', '.join([f'{length:.2f}' for length in s])}
 
-    β angles:
-    {', '.join([f'{np.degrees(angle):.2f}°' for angle in beta])}
+β angles:
+{', '.join([f'{np.degrees(angle):.2f}°' for angle in beta])}
 
-    a lengths:
-    {', '.join([f'{length:.2f}' for length in a])}
+a lengths:
+{', '.join([f'{length:.2f}' for length in a])}
 
-    Folding angles (αi1, αi2):
-    {folding_angles}
+Folding angles (αi1, αi2):
+{folding_angles}
 
-    Heights (hi):
-    {', '.join([f'{height:.2f}' for height in h])}
-    """
+Heights (hi):
+{', '.join([f'{height:.2f}' for height in h])}
+"""
 
         return figure, param_display
 
