@@ -1,5 +1,7 @@
+from io import BytesIO
 
 import dash
+import ezdxf
 import numpy as np
 import plotly.express as px
 import plotly.graph_objs as go
@@ -39,16 +41,18 @@ app.layout = html.Div([
             dcc.Dropdown(id='radial-color-input', options=color_options, value='black', clearable=False),
             html.Div([
                 html.Label("Fold line width:"),
-            dcc.Input(id='fold-width-input', type='number', value=2, min=1, step=1)
+                dcc.Input(id='fold-width-input', type='number', value=2, min=1, step=1)
             ], style={'margin-bottom': '10px'}),
             html.Div([
                 html.Label("Radial line width:"),
-            dcc.Input(id='radial-width-input', type='number', value=1, min=1, step=1)
+                dcc.Input(id='radial-width-input', type='number', value=1, min=1, step=1)
             ], style={'margin-bottom': '10px'}),
             html.Div([
-                html.Button("Export SVG", id="export-button", n_clicks=0),
-            dcc.Download(id="download-svg")
-            ], style={'margin-bottom': '10px'})
+    html.Button("Export SVG", id="export-button", n_clicks=0, style={'margin-right': '10px'}),
+    html.Button("Export DXF", id="export-dxf-button", n_clicks=0),
+    dcc.Download(id="download-svg"),
+    dcc.Download(id="download-dxf")
+], style={'margin-bottom': '10px'})
         ], style={'width': '20%', 'display': 'inline-block', 'vertical-align': 'top'}),
         html.Div([
             dcc.Graph(id='pattern-plot')
@@ -293,6 +297,133 @@ Heights (hi):
 
     return figure, param_display
 
+import os
+import tempfile
+
+
+def create_dxf(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width):
+    """
+    Create DXF file with exact dimensions matching the pattern generation
+    Using newer AutoCAD format for better compatibility
+    """
+    try:
+        # Use AutoCAD 2010 format instead of R12
+        doc = ezdxf.new('AC1024')  # AutoCAD 2010
+        msp = doc.modelspace()
+
+        # Set units to meters with absolute coordinates
+        doc.header['$MEASUREMENT'] = 1     # Set measurement to metric
+        doc.header['$INSUNITS'] = 1        # 1 = meters
+        doc.header['$LUNITS'] = 2          # Scientific notation
+        doc.header['$AUNITS'] = 0          # Decimal degrees
+        doc.header['$UNITMODE'] = 0        # Display units as decimal
+        
+        # Create required linetypes
+        if 'DASHED' not in doc.linetypes:
+            doc.linetypes.add('DASHED', pattern='A,0.5,-0.25')
+
+        # Get pattern using existing generate_pattern function
+        traces = generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width)
+        
+        # Track pattern extents for verification
+        min_x = min_y = float('inf')
+        max_x = max_y = float('-inf')
+        
+        # Add pattern lines using exact coordinates from generate_pattern
+        for trace in traces:
+            x, y = trace['x'], trace['y']
+            
+            if len(x) == 2 and all(coord is not None for coord in x + y):
+                start = (float(x[0]), float(y[0]))
+                end = (float(x[1]), float(y[1]))
+                
+                min_x = min(min_x, start[0], end[0])
+                max_x = max(max_x, start[0], end[0])
+                min_y = min(min_y, start[1], end[1])
+                max_y = max(max_y, start[1], end[1])
+                
+                # Add lines with appropriate line type and color
+                if 'dash' in trace['line'] and trace['line']['dash'] == 'dash':
+                    msp.add_line(start, end, dxfattribs={
+                        'linetype': 'DASHED',
+                        'color': 7  # White/black
+                    })
+                else:
+                    color = 1 if trace['line']['color'] == fold_color_1 else 5  # Red=1, Blue=5
+                    msp.add_line(start, end, dxfattribs={'color': color})
+
+        # Print exact dimensions for verification
+        print(f"DXF Pattern Dimensions:")
+        print(f"X extent: {min_x:.6f}m to {max_x:.6f}m (width: {(max_x - min_x):.6f}m)")
+        print(f"Y extent: {min_y:.6f}m to {max_y:.6f}m (height: {(max_y - min_y):.6f}m)")
+        print(f"Input radius: {r:.6f}m")
+        print(f"Measured radius: {max(abs(max_x), abs(max_y)):.6f}m")
+        
+        # Add verification circle at exact input radius
+        msp.add_circle((0, 0), r, dxfattribs={'color': 3})  # Green
+
+        # Setup dimension style
+        dimstyle = doc.dimstyles.new('METRIC')
+        dimstyle.dxf.dimscale = 1.0
+        dimstyle.dxf.dimexe = 0.05
+        dimstyle.dxf.dimexo = 0.05
+        dimstyle.dxf.dimasz = 0.1
+        dimstyle.dxf.dimtxt = 0.2
+        
+        # Add diameter dimension
+        msp.add_linear_dim(
+            base=(0, min_y - 0.5),
+            p1=(-max_x, 0),
+            p2=(max_x, 0),
+            dimstyle='METRIC',
+            override={
+                'dimtxt': 0.2,
+                'dimclrd': 7,  # Dimension line color
+                'dimclre': 7   # Extension line color
+            }
+        ).render()
+
+        # Create temporary file and save
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.dxf') as tmp_file:
+            tmp_filename = tmp_file.name
+            doc.saveas(tmp_filename)
+            
+            file_size = os.path.getsize(tmp_filename)
+            print(f"DXF file created: {file_size} bytes")
+            
+            with open(tmp_filename, 'rb') as f:
+                buffer = BytesIO(f.read())
+            
+        os.unlink(tmp_filename)
+        
+        buffer.seek(0)
+        return buffer
+
+    except Exception as e:
+        print(f"Error creating DXF: {str(e)}")
+        print(f"Error details: {str(e.__class__.__name__)}")
+        raise
+# Add a new callback for DXF export
+@app.callback(
+    Output("download-dxf", "data"),
+    Input("export-dxf-button", "n_clicks"),
+    [State('radius-input', 'value'),
+     State('segments-input', 'value'),
+     State('fold-color-1-input', 'value'),
+     State('fold-color-2-input', 'value'),
+     State('radial-color-input', 'value'),
+     State('fold-width-input', 'value'),
+     State('radial-width-input', 'value')],
+    prevent_initial_call=True
+)
+def export_dxf(n_clicks, r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width):
+    if n_clicks == 0:
+        raise PreventUpdate
+    
+    buffer = create_dxf(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width)
+    return dcc.send_bytes(buffer.getvalue(), "pseudo_dome_pattern.dxf")
+
+
 def create_svg(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width):
     traces = generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width)
     
@@ -316,6 +447,8 @@ def create_svg(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_
     svg_lines.append('</svg>')
     return '\n'.join(svg_lines)
 
+  
+    
 @app.callback(
     Output("download-svg", "data"),
     Input("export-button", "n_clicks"),
