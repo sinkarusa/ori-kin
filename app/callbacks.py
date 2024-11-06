@@ -4,12 +4,20 @@ from dash import dcc
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
 
-from .utils.calculations import calculate_parameters
+from .layout import format_parameters
+from .utils.barrel_vault import generate_barrel_vault_pattern
+from .utils.calculations import (
+    calculate_folding_angle,
+    calculate_height,
+    calculate_parameters,
+    calculate_segment_angle,
+    calculate_segment_length,
+)
 from .utils.export import create_dxf, create_svg
 from .utils.pattern_generator import generate_pattern
 
 
-def register_callbacks(app):  
+def register_pseudo_dome_callbacks(app):  
     @app.callback(
         [Output('pattern-plot', 'figure'),
         Output('parameter-display', 'children')],
@@ -127,3 +135,55 @@ Heights (hi):
         
         svg_string = create_svg(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width)
         return dict(content=svg_string, filename="pseudo_dome_pattern.svg")
+
+
+def register_barrel_vault_callbacks(app):
+    @app.callback(
+        [Output('barrel-pattern-plot', 'figure'),
+        Output('barrel-parameter-display', 'children')],  # Changed to match new ID
+        [Input('barrel-radius-input', 'value'),
+        Input('barrel-segments-input', 'value'),
+        Input('barrel-omega-input', 'value'),
+        Input('barrel-fold-color-1-input', 'value'),
+        Input('barrel-fold-color-2-input', 'value'),
+        Input('barrel-connection-color-input', 'value'),
+        Input('barrel-fold-width-input', 'value'),
+        Input('barrel-connection-width-input', 'value')]
+    )
+    def update_barrel_vault_pattern(r, n, omega, fold_color_1, fold_color_2, 
+                              connection_color, fold_width, connection_width):
+        # Calculate parameters
+        theta = calculate_segment_angle(omega, n)
+        s = calculate_segment_length(r, theta)
+        alpha = calculate_folding_angle(theta)
+        h = calculate_height(s, alpha)
+        
+        total_width = n * s
+        total_height = 2 * h
+        
+        # Generate pattern
+        traces = generate_barrel_vault_pattern(r, n, omega)
+        
+        # Format parameters display
+        parameters_text = format_parameters(r, n, omega, theta, s, alpha, h, total_width, total_height)
+        
+        layout = go.Layout(
+            margin=dict(l=40, r=40, t=40, b=40),
+            xaxis=dict(
+                scaleanchor="y",
+                scaleratio=1,
+                range=[-h, total_width + h]
+            ),
+            yaxis=dict(
+                scaleanchor="x",
+                scaleratio=1,
+                range=[-total_height/2 - h/2, total_height/2 + h]
+            ),
+            showlegend=False
+        )
+        
+        return {'data': traces, 'layout': layout}, parameters_text
+
+def register_callbacks(app):
+    register_pseudo_dome_callbacks(app)
+    register_barrel_vault_callbacks(app)
