@@ -9,14 +9,44 @@ from .calculations import (
 )
 
 
-def generate_barrel_vault_pattern(r, n, omega, fold_color_1='red', fold_color_2='blue', 
+def generate_barrel_vault_pattern(r, n, m, omega, fold_color_1='red', fold_color_2='blue', 
+                               connecting_color='gray', mv_width=2, connecting_width=1):
+    
+    # Calculate basic parameters
+    theta = calculate_segment_angle(omega, n)
+    s = calculate_segment_length(r, theta)
+    alpha = calculate_folding_angle(theta)
+    h = calculate_height(s, alpha)
+    
+    unit_cell_traces = generate_barrel_vault_pattern_unit_cell(s,n,h, 
+                        fold_color_1=fold_color_1, fold_color_2=fold_color_2, 
+                        connecting_color=connecting_color, mv_width=mv_width, 
+                        connecting_width=connecting_width)
+    
+    full_traces = [t for t in unit_cell_traces]
+    for i in range(1, m):
+        for trace in unit_cell_traces:
+            x, y = np.array(trace['x']), np.array(trace['y'])
+            y_translated = y+4*h*i
+            full_traces.append(
+                go.Scatter(x=x, y=y_translated,
+                           mode=trace['mode'],
+                           line=trace['line'] if 'line' in trace else None,
+                           marker=trace['marker'] if 'marker' in trace else None))
+            y_translated = y-4*h*i
+            full_traces.append(
+                go.Scatter(x=x, y=y_translated,
+                           mode=trace['mode'],
+                           line=trace['line'] if 'line' in trace else None,
+                           marker=trace['marker'] if 'marker' in trace else None))
+    return full_traces
+
+def generate_barrel_vault_pattern_unit_cell(s,n,h, fold_color_1='red', fold_color_2='blue', 
                                connecting_color='gray', mv_width=2, connecting_width=1):
     """
     Generate traces for the barrel vault pattern.
     
-    Args:
-    r (float): Radius
-    n (int): Number of segments
+    
     omega (float): Central angle in degrees
     fold_color_1 (str): Color for mountain folds
     fold_color_2 (str): Color for valley folds
@@ -27,40 +57,14 @@ def generate_barrel_vault_pattern(r, n, omega, fold_color_1='red', fold_color_2=
     Returns:
     list: List of Plotly scatter traces
     """
-    # Calculate basic parameters
-    theta = calculate_segment_angle(omega, n)
-    s = calculate_segment_length(r, theta)
-    alpha = calculate_folding_angle(theta)
-    h = calculate_height(s, alpha)
+
     
     traces = []
-    # Create parameter annotations
-    param_text = (
-        f'Parameters:<br>'
-        f'r = {r:.2f}<br>'
-        f'n = {n}<br>'
-        f'Ω = {omega}°<br>'
-        f'θ = {theta:.2f}°<br>'
-        f's = {s:.2f}<br>'
-        f'α = {alpha:.2f}°<br>'
-        f'h = {h:.2f}'
-    )
-    
-    # Add parameter annotation trace
-    traces.append(go.Scatter(
-        x=[0],
-        y=[h + h/2],  # Position above the pattern
-        mode='text',
-        text=[param_text],
-        textposition="top left",
-        textfont=dict(size=12),
-        showlegend=False,
-        hoverinfo='none'
-    ))
+   
     # Generate horizontal segment at the begingng
     current_x = 0
     current_y = 0
-    next_x = current_x + s
+    next_x = current_x + s/2
     next_y = current_y
     # Horizontal segment
     # color = fold_color_1 if i % 2 == 0 else fold_color_2
@@ -71,7 +75,8 @@ def generate_barrel_vault_pattern(r, n, omega, fold_color_1='red', fold_color_2=
         line=dict(color='black', width=mv_width)
     ))
     
-    n_reps = int(n/2)+1 if n%2 else int(n/2)
+    
+    n_reps = int(np.floor(n/2)) if n%2 else int(n/2)-1
     current_x_sym_org = next_x
     current_y_sym_org = next_y
     for j in range(2): 
@@ -81,60 +86,59 @@ def generate_barrel_vault_pattern(r, n, omega, fold_color_1='red', fold_color_2=
         current_y = current_y_sym_org
         for i in range(n_reps):
             next_x = current_x + s
-            next_y = current_y + y_dir*h
+            next_y = current_y + y_dir*2*h
             # Upper diagonal
             traces.append(go.Scatter(
                 x=[current_x, next_x],
                 y=[current_y, next_y],
                 mode='lines',
-                line=dict(color=fold_color_1 if (next_y-current_y) > 0 else fold_color_2, width=mv_width)
+                line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
             ))
             
             current_x = next_x
             current_y = next_y
             next_x = current_x + s
-            next_y = current_y - y_dir*h
+            next_y = current_y - y_dir*2*h
             # Lower diagonal
             traces.append(go.Scatter(
                 x=[current_x, next_x],
                 y=[current_y, next_y],
                 mode='lines',
-                line=dict(color=fold_color_1 if (next_y-current_y) > 0 else fold_color_2, width=mv_width)
+                line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
             ))
             
             current_x = next_x
             current_y = next_y
         
-    # Upper horizontal line
-    traces.append(go.Scatter(
-        x=[0, n*s+1],
-        y=[h, h],
-        mode='lines',
-        line=dict(color=connecting_color, width=connecting_width, dash='dash')
-    ))
-    
-    # Lower horizontal line
-    traces.append(go.Scatter(
-        x=[0, n*s+1],
-        y=[-h, -h],
-        mode='lines',
-        line=dict(color=connecting_color, width=connecting_width, dash='dash')
-    ))
-    
-    # Left vertical connecting line
-    traces.append(go.Scatter(
-        x=[0, 0],
-        y=[-h, h],
-        mode='lines',
-        line=dict(color=connecting_color, width=connecting_width, dash='dash')
-    ))
-    
-    # Right vertical connecting line
-    traces.append(go.Scatter(
-        x=[n*s+1, n*s+1],
-        y=[-h, h],
-        mode='lines',
-        line=dict(color=connecting_color, width=connecting_width, dash='dash')
-    ))
+        if n%2==0:
+            next_x = current_x + s
+            next_y = current_y + y_dir*2*h
+            # Upper diagonal
+            traces.append(go.Scatter(
+                x=[current_x, next_x],
+                y=[current_y, next_y],
+                mode='lines',
+                line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
+            ))
+    # horizontal lines
+    hl_pos = [-2*h,-h,0,h,2*h]
+    total_length = n*s
+    for hlp in hl_pos:
+        traces.append(go.Scatter(
+            x=[0, total_length],
+            y=[hlp,hlp],
+            mode='lines',
+            line=dict(color=connecting_color, width=connecting_width, dash='dash')
+        ))
+   
+    # vertical lines
+    vl_pos = [0,total_length]
+    for vlp in vl_pos:
+        traces.append(go.Scatter(
+            x=[vlp,vlp],
+            y=[np.min(hl_pos),np.max(hl_pos)],
+            mode='lines',
+            line=dict(color=connecting_color, width=connecting_width, dash='solid')
+        ))
     
     return traces

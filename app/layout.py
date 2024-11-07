@@ -71,10 +71,11 @@ def create_pseudo_dome_layout():
             ], style={'display': 'flex', 'justify-content': 'space-between'})
         ])
 
-def format_parameters(r, n, omega, theta, s, alpha, h, total_width, total_height):
+def format_parameters(r, n, m, omega, theta, s, alpha, h, total_width, total_height):
     return f"""Input Parameters:
     Radius (r): {r:.2f}
     Number of segments (n): {n}
+    Number of tiles (m): {m}
     Central angle (Ω): {omega:.2f}°
 
 Calculated Parameters:
@@ -99,7 +100,11 @@ def create_barrel_vault_layout():
                 ], style={'margin-bottom': '10px'}),
                 html.Div([
                     html.Label("Number of segments (n):"),
-                    dcc.Input(id='barrel-segments-input', type='number', value=6, min=3, step=1)
+                    dcc.Input(id='barrel-segments-input', type='number', value=6, min=3, max=20,step=1)
+                ], style={'margin-bottom': '10px'}),
+                html.Div([
+                    html.Label("Number of tiles (m):"),
+                    dcc.Input(id='barrel-tiles-input', type='number', value=1, min=1, max=20,step=1)
                 ], style={'margin-bottom': '10px'}),
                 html.Div([
                     html.Label("Central angle (Ω):"),
@@ -139,7 +144,7 @@ def create_barrel_vault_layout():
             ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '10px'})
         ], style={'display': 'flex', 'justify-content': 'space-between'})
     ])
-def create_parameters_display(r, n, omega, theta, s, alpha, h, total_width, total_height):
+def create_parameters_display(r, n, m, omega, theta, s, alpha, h, total_width, total_height):
     return html.Div([
         html.H3("Pattern Parameters", style={'marginBottom': '20px'}),
         
@@ -148,6 +153,7 @@ def create_parameters_display(r, n, omega, theta, s, alpha, h, total_width, tota
             html.Table([
                 html.Tr([html.Td("Radius (r):"), html.Td(f"{r:.2f}")]),
                 html.Tr([html.Td("Number of segments (n):"), html.Td(f"{n}")]),
+                html.Tr([html.Td("Number of tiles (m):"), html.Td(f"{m}")]),
                 html.Tr([html.Td("Central angle (Ω):"), html.Td(f"{omega:.2f}°")]),
             ], style={'width': '100%', 'marginBottom': '20px'}),
             
