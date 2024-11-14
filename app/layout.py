@@ -71,7 +71,7 @@ def create_pseudo_dome_layout():
             ], style={'display': 'flex', 'justify-content': 'space-between'})
         ])
 
-def format_parameters(r, n, m, omega, theta, s, alpha, h, total_width, total_height):
+def format_parameters(r, n, m, omega, theta, s, alpha,h_max, h, total_width, total_height):
     return f"""Input Parameters:
     Radius (r): {r:.2f}
     Number of segments (n): {n}
@@ -82,7 +82,8 @@ Calculated Parameters:
     Segment angle (θ): {theta:.2f}°
     Segment length (s): {s:.2f}
     Folding angle (α): {alpha:.2f}°
-    Height (h): {h:.2f}
+    Max Height (h_max): {h_max:.2f}
+    Set Height (h): {h:.2f}
 
 Pattern Properties:
     Total Width: {total_width:.2f}
@@ -105,6 +106,10 @@ def create_barrel_vault_layout():
                 html.Div([
                     html.Label("Number of tiles (m):"),
                     dcc.Input(id='barrel-tiles-input', type='number', value=1, min=1, max=20,step=1)
+                ], style={'margin-bottom': '10px'}),
+                html.Div([
+                    html.Label("Unit cell height (h) [clamped by hmax=tan(Ω/(2n))]:"),
+                    dcc.Input(id='barrel-height-input', type='number', value=1, min=0, max=20,step=0.01)
                 ], style={'margin-bottom': '10px'}),
                 html.Div([
                     html.Label("Central angle (Ω):"),

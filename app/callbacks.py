@@ -145,29 +145,31 @@ def register_barrel_vault_callbacks(app):
         Input('barrel-segments-input', 'value'),
         Input('barrel-tiles-input', 'value'),
         Input('barrel-omega-input', 'value'),
+        Input('barrel-height-input', 'value'),
         Input('barrel-fold-color-1-input', 'value'),
         Input('barrel-fold-color-2-input', 'value'),
         Input('barrel-connection-color-input', 'value'),
         Input('barrel-fold-width-input', 'value'),
         Input('barrel-connection-width-input', 'value')]
     )
-    def update_barrel_vault_pattern(r, n, m, omega, fold_color_1, fold_color_2, 
+    def update_barrel_vault_pattern(r, n, m, omega,h, fold_color_1, fold_color_2, 
                               connection_color, fold_width, connection_width):
         # Calculate parameters
         theta = calculate_segment_angle(omega, n)
         s = calculate_segment_length(r, theta)
         alpha = calculate_folding_angle(theta)
-        h = calculate_height(s, alpha)
+        h_max = calculate_height(s, alpha)
+        h = np.clip(h,0,h_max)
         
         total_width = n * s
         total_height = 2 * h
         
         # Generate pattern
-        traces = generate_barrel_vault_pattern(r, n, m, omega,fold_color_1, fold_color_2, 
+        traces = generate_barrel_vault_pattern(r, n, m, omega,h,fold_color_1, fold_color_2, 
                               connection_color, fold_width, connection_width)
         
         # Format parameters display
-        parameters_text = format_parameters(r, n, m, omega, theta, s, alpha, h, total_width, total_height)
+        parameters_text = format_parameters(r, n, m, omega, theta, s, alpha, h_max,h, total_width, total_height)
         
         layout = go.Layout(
             margin=dict(l=40, r=40, t=40, b=40),
