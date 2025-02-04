@@ -5,7 +5,7 @@ from .config import COLOR_OPTIONS
 
 def create_landing_layout():
     return html.Div([
-        html.H1("Pattern Generator Selection", style={'text-align': 'center', 'margin-bottom': '40px'}),
+        html.H1("ORI-KIN", style={'text-align': 'center', 'margin-bottom': '40px'}),
         html.Div([
             html.Div([
                 html.H3("Pseudo-Dome Pattern Generator"),
@@ -24,7 +24,16 @@ def create_landing_layout():
                     href='/barrel-vault'
                 )
             ], style={'width': '300px', 'padding': '20px', 'border': '1px solid #ddd', 'margin': '10px'})
-        ], style={'display': 'flex', 'justify-content': 'center', 'gap': '20px'})
+        ], style={'display': 'flex', 'justify-content': 'center', 'gap': '20px'}),
+
+        # Add your images below the buttons:
+        html.Div(
+            [
+                html.Img(src='/assets/pseudo_dome.png', style={'width': '300px', 'margin': '20px'}),
+                html.Img(src='/assets/barrel_vault.png', style={'width': '300px', 'margin': '20px'}),
+            ],
+            style={'display': 'flex', 'justify-content': 'center'}
+        )
     ])
 
 def create_pseudo_dome_layout():
@@ -136,7 +145,35 @@ def create_barrel_vault_layout():
                     dcc.Download(id="barrel-download-dxf")
                 ], style={'margin-bottom': '10px'})
             ], style={'width': '20%', 'display': 'inline-block', 'vertical-align': 'top'}),
-            
+
+            # <---- Add your separator line here ---->
+            html.Hr(),
+
+            # <---- Instructions text block ---->
+            html.Div([
+                # You can either use a plain Div with line breaks:
+                html.Div("Single-centered Barrel Vault Pattern Generator"),
+                html.Div("Main Parameters"),
+                html.Div("Radius"),
+                html.Div("Number of segment"),
+                html.Div("Central angle"),
+                html.Div("Note: Omega=180 : Semicircle; Omega>180 : Horseshoe arch"),
+                html.Br(),
+                html.Div("Secondary parameters"),
+                html.Div("Number of row"),
+                html.Div("h value"),
+                html.Div("Note:"),
+                html.Div("h = max => triangular crease pattern"),
+                html.Div("h < max => trapezoidal pattern"),
+                html.Br(),
+                html.Div("Drawing parameters"),
+                html.Div("Fold color 1"),
+                html.Div("Fold color 2"),
+                html.Div("Connection line color"),
+                html.Div("Fold line width"),
+                html.Div("Connection line width"),
+            ], style={'whiteSpace': 'pre-line', 'margin-top': '10px'}),
+        
             # Plot column
             html.Div([
                 dcc.Graph(id='barrel-pattern-plot')
