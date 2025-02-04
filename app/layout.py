@@ -6,34 +6,31 @@ from .config import COLOR_OPTIONS
 def create_landing_layout():
     return html.Div([
         html.H1("ORI-KIN", style={'text-align': 'center', 'margin-bottom': '40px'}),
+        
         html.Div([
-            html.Div([
-                html.H3("Pseudo-Dome Pattern Generator"),
-                html.P("Generate patterns for creating pseudo-dome structures"),
-                dcc.Link(
-                    html.Button("Select", style={'width': '100%'}),
-                    href='/pseudo-dome'
-                )
-            ], style={'width': '300px', 'padding': '20px', 'border': '1px solid #ddd', 'margin': '10px'}),
-            
-            html.Div([
-                html.H3("Barrel Vault Pattern Generator"),
-                html.P("Generate patterns for creating barrel vault structures"),
-                dcc.Link(
-                    html.Button("Select", style={'width': '100%'}),
-                    href='/barrel-vault'
-                )
-            ], style={'width': '300px', 'padding': '20px', 'border': '1px solid #ddd', 'margin': '10px'})
-        ], style={'display': 'flex', 'justify-content': 'center', 'gap': '20px'}),
+            # Pseudo-Dome
+            dcc.Link(
+                html.Div([
+                    html.Img(src='/assets/pseudo_dome.png', style={'height': '200px'}),
+                    html.P("Pseudo-Dome Pattern Generator"),
+                ], style={'textAlign': 'center', 'cursor': 'pointer'}),
+                href='/pseudo-dome'
+            ),
 
-        # Add your images below the buttons:
-        html.Div(
-            [
-                html.Img(src='/assets/pseudo_dome.png', style={'width': '300px', 'margin': '20px'}),
-                html.Img(src='/assets/barrel_vault.png', style={'width': '300px', 'margin': '20px'}),
-            ],
-            style={'display': 'flex', 'justify-content': 'center'}
-        )
+            # Barrel Vault
+            dcc.Link(
+                html.Div([
+                    html.Img(src='/assets/barrel_vault.png', style={'height': '200px'}),
+                    html.P("Barrel Vault Pattern Generator"),
+                ], style={'textAlign': 'center', 'cursor': 'pointer'}),
+                href='/barrel-vault'
+            ),
+        ], style={
+            'display': 'flex',
+            'justify-content': 'center',
+            'gap': '50px',
+            'alignItems': 'center'
+        }),
     ])
 
 def create_pseudo_dome_layout():
