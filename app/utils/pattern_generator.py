@@ -120,5 +120,5 @@ def generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, r
             if i == int(num_radial_segments/2)-1:
                 if trace['mode'] == 'marker':
                     first_and_last_markers.append((rotated_points[x][0],rotated_points[y][0]))
-    print(first_and_last_markers)
+    # print(first_and_last_markers)
     return full_traces

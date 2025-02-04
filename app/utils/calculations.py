@@ -35,3 +35,21 @@ def calculate_parameters(r, n):
     num_radial_segments = int(round(360 / (2 * np.degrees(alpha[0][0]/2))))
     
     return thetas, s, A, beta, a, alpha, h, theta1, theta_l, CD, alpha[0][0], num_radial_segments
+
+### Barrel vault pattern calculations
+def calculate_segment_angle(omega, n):
+    """Calculate segment angle θ using equation 3.1"""
+    return omega / n
+
+def calculate_segment_length(r, theta):
+    """Calculate segment length s using equation 3.2"""
+    return 2 * r * np.sin(np.radians(theta/2))
+
+def calculate_folding_angle(theta):
+    """Calculate folding angle α using equation 3.9"""
+    beta = np.pi - np.radians(theta)  # equation 3.7
+    return np.degrees((np.pi - beta) / 2)
+
+def calculate_height(s, alpha):
+    """Calculate height h using equation 3.10"""
+    return np.tan(np.radians(alpha)) * (s/2)
