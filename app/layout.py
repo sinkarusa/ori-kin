@@ -117,7 +117,7 @@ def create_barrel_vault_layout():
                     dcc.Input(id='barrel-tiles-input', type='number', value=1, min=1, max=20,step=1)
                 ], style={'margin-bottom': '10px'}),
                 html.Div([
-                    html.Label("Unit cell height (h) [clamped by hmax=tan(Ω/(2n))]:"),
+                    html.Label(id='barrel-height-label'),
                     dcc.Input(id='barrel-height-input', type='number', value=1, min=0, max=20,step=0.01)
                 ], style={'margin-bottom': '10px'}),
                 html.Div([

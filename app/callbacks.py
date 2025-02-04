@@ -140,7 +140,8 @@ Heights (hi):
 def register_barrel_vault_callbacks(app):
     @app.callback(
         [Output('barrel-pattern-plot', 'figure'),
-        Output('barrel-parameter-display', 'children')],  # Changed to match new ID
+        Output('barrel-parameter-display', 'children'),
+        Output('barrel-height-label', 'children')], 
         [Input('barrel-radius-input', 'value'),
         Input('barrel-segments-input', 'value'),
         Input('barrel-tiles-input', 'value'),
@@ -160,6 +161,8 @@ def register_barrel_vault_callbacks(app):
         alpha = calculate_folding_angle(theta)
         h_max = calculate_height(s, alpha)
         h = np.clip(h,0,h_max)
+
+        barrel_height_label = f"Unit cell height (h) [clamped by hmax={h_max:.2f}]:"
         
         total_width = n * s
         total_height = 2 * h
@@ -186,8 +189,9 @@ def register_barrel_vault_callbacks(app):
             showlegend=False
         )
         
-        return {'data': traces, 'layout': layout}, parameters_text
+        return {'data': traces, 'layout': layout}, parameters_text, barrel_height_label
 
+   
 def register_callbacks(app):
     register_pseudo_dome_callbacks(app)
     register_barrel_vault_callbacks(app)
