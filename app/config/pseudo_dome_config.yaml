@@ -3,8 +3,8 @@
 # Colors
 colors:
   fold_color_1: "rgb(0,255,0)"
-  fold_color_2: "red"
-  radial_color: "blue"
+  fold_color_2: "rgb(255,0,0)"
+  radial_color: "rgb(0,0,255)"
 
 # Line Widths
 line_widths:

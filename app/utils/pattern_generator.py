@@ -126,6 +126,30 @@ def generate_pattern(r, n, fold_color_1=None, fold_color_2=None, radial_color=No
             #     if trace['mode'] == 'marker':
             #         first_and_last_markers.append((rotated_points[x][0],rotated_points[y][0]))
     # print(first_and_last_markers)
+    # add a cut line to the end
+    # find the trace with ending point closest to positive x axis
+    closest_trace = None
+    max_x = -float('inf')
+    
+    for trace in full_traces:
+        # Check if this trace's endpoint has a larger x value
+        if len(trace['x']) > 1 and trace['x'][-1] > max_x:
+            max_x = trace['x'][-1]
+            closest_trace = trace
+    
+    # If we couldn't find a suitable trace, use the first one as fallback
+    if closest_trace is None and len(full_traces) > 0:
+        closest_trace = full_traces[0]
     # reverse order of traces
     full_traces.reverse()
+    
+    # Only add the cut line if we found a valid trace
+    if closest_trace is not None:
+        # Add a cut line from origin to the endpoint of the trace closest to positive x-axis
+        full_traces.append(go.Scatter(
+            x=[0, closest_trace['x'][-1]], 
+            y=[0, closest_trace['y'][-1]], 
+            mode='lines', 
+            line=dict(color=fold_color_1, width=mv_width)
+        ))
     return full_traces
