@@ -1,6 +1,8 @@
 from dash import dcc, html
+import dash_bootstrap_components as dbc
 
 from .config import COLOR_OPTIONS
+from .utils.config_loader import get_pseudo_dome_config
 
 
 def create_landing_layout():
@@ -35,38 +37,79 @@ def create_landing_layout():
 
 def create_pseudo_dome_layout():
     return html.Div([
-            html.H1("Pseudo-Dome Pattern Generator with Parameters"),
+            html.H1("Pseudo-Dome Pattern Generator", style={'text-align': 'center', 'margin-bottom': '20px'}),
+            
+            # Modal for help information
+            dbc.Modal([
+                dbc.ModalHeader("Pseudo-Dome Pattern Information"),
+                dbc.ModalBody([
+                    html.Img(src='/assets/pseudo-dome_Drop down menu_V2.jpg', style={'width': '100%'})
+                ]),
+                dbc.ModalFooter(
+                    dbc.Button("Close", id="close-help-modal", className="ml-auto")
+                ),
+            ], id="help-modal", size="lg"),
             html.Div([
+                # Left panel with inputs and export buttons
                 html.Div([
                     html.Div([
-                        html.Label("Radius (r):"),
-                        dcc.Input(id='radius-input', type='number', value=5, min=1, step=0.1)
-                    ], style={'margin-bottom': '10px'}),
+                        html.Div([
+                            html.Label("Radius (r):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                            html.Button(
+                                html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
+                                id="radius-help-button",
+                                style={
+                                    'background': 'none',
+                                    'border': 'none',
+                                    'color': '#007bff',
+                                    'cursor': 'pointer',
+                                    'vertical-align': 'middle',
+                                    'padding': '0',
+                                    'margin-left': '5px'
+                                }
+                            ),
+                        ], style={'margin-bottom': '5px'}),
+                        dcc.Input(id='radius-input', type='number', value=5, min=1, step=0.1, 
+                                 style={'width': '100%', 'margin-bottom': '5px'})
+                    ], style={'margin-bottom': '15px'}),
                     html.Div([
-                        html.Label("Number of segments (n):"),
-                        dcc.Input(id='segments-input', type='number', value=5, min=3, step=1)
-                    ], style={'margin-bottom': '10px'}),
-                    html.Label("Fold color 1:"),
-                    dcc.Dropdown(id='fold-color-1-input', options=COLOR_OPTIONS, value='red', clearable=False),
-                    html.Label("Fold color 2:"),
-                    dcc.Dropdown(id='fold-color-2-input', options=COLOR_OPTIONS, value='blue', clearable=False),
-                    html.Label("Radial line color:"),
-                    dcc.Dropdown(id='radial-color-input', options=COLOR_OPTIONS, value='black', clearable=False),
+                        html.Div([
+                            html.Label("Number of segments (n):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                            html.Button(
+                                html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
+                                id="segments-help-button",
+                                style={
+                                    'background': 'none',
+                                    'border': 'none',
+                                    'color': '#007bff',
+                                    'cursor': 'pointer',
+                                    'vertical-align': 'middle',
+                                    'padding': '0',
+                                    'margin-left': '5px'
+                                }
+                            ),
+                        ], style={'margin-bottom': '5px'}),
+                        dcc.Input(id='segments-input', type='number', value=5, min=3, step=1,
+                                 style={'width': '100%', 'margin-bottom': '5px'})
+                    ], style={'margin-bottom': '20px'}),
+                    # Hidden inputs with values from config (no UI elements)
                     html.Div([
-                        html.Label("Fold line width:"),
-                        dcc.Input(id='fold-width-input', type='number', value=2, min=1, step=1)
-                    ], style={'margin-bottom': '10px'}),
+                        dcc.Input(id='fold-color-1-input', type='hidden', value=''),
+                        dcc.Input(id='fold-color-2-input', type='hidden', value=''),
+                        dcc.Input(id='radial-color-input', type='hidden', value=''),
+                        dcc.Input(id='fold-width-input', type='hidden', value=''),
+                        dcc.Input(id='radial-width-input', type='hidden', value='')
+                    ]),
+                    # Export buttons
                     html.Div([
-                        html.Label("Radial line width:"),
-                        dcc.Input(id='radial-width-input', type='number', value=1, min=1, step=1)
-                    ], style={'margin-bottom': '10px'}),
-                    html.Div([
-            html.Button("Export SVG", id="export-button", n_clicks=0, style={'margin-right': '10px'}),
-            html.Button("Export DXF", id="export-dxf-button", n_clicks=0),
-            dcc.Download(id="download-svg"),
-            dcc.Download(id="download-dxf")
-        ], style={'margin-bottom': '10px'})
-                ], style={'width': '20%', 'display': 'inline-block', 'vertical-align': 'top'}),
+                        html.Button("Export SVG", id="export-button", n_clicks=0, 
+                                  style={'margin-right': '10px', 'padding': '8px 15px', 'background-color': '#4CAF50', 'color': 'white', 'border': 'none', 'border-radius': '4px'}),
+                        html.Button("Export DXF", id="export-dxf-button", n_clicks=0,
+                                  style={'padding': '8px 15px', 'background-color': '#2196F3', 'color': 'white', 'border': 'none', 'border-radius': '4px'}),
+                        dcc.Download(id="download-svg"),
+                        dcc.Download(id="download-dxf")
+                    ], style={'margin-bottom': '20px', 'display': 'flex', 'justify-content': 'center'})
+                ], style={'width': '20%', 'display': 'inline-block', 'vertical-align': 'top', 'padding-left': '30px'}),
                 html.Div([
                     dcc.Graph(id='pattern-plot')
                 ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top'}),

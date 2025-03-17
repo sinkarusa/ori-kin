@@ -5,9 +5,20 @@ from io import BytesIO
 import ezdxf
 
 from .pattern_generator import generate_pattern
+from .config_loader import get_pseudo_dome_config
 
 
-def create_dxf(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width):
+def create_dxf(r, n, fold_color_1=None, fold_color_2=None, radial_color=None, fold_width=None, radial_width=None):
+    # Load configuration from YAML file
+    config = get_pseudo_dome_config()
+    
+    # Use provided values or defaults from config
+    fold_color_1 = fold_color_1 or config['colors']['fold_color_1']
+    fold_color_2 = fold_color_2 or config['colors']['fold_color_2']
+    radial_color = radial_color or config['colors']['radial_color']
+    fold_width = fold_width or config['line_widths']['fold_width']
+    radial_width = radial_width or config['line_widths']['radial_width']
+    radial_line_style = config['line_styles']['radial_line_style']
     """
     Create DXF file with exact dimensions matching the pattern generation
     Using newer AutoCAD format for better compatibility
@@ -49,10 +60,19 @@ def create_dxf(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radia
                 max_y = max(max_y, start[1], end[1])
                 
                 # Add lines with appropriate line type and color
-                if 'dash' in trace['line'] and trace['line']['dash'] == 'dash':
+                # Apply line style based on configuration
+                if trace['line']['color'] == radial_color:
+                    linetype = 'CONTINUOUS'
+                    if radial_line_style == 'dash':
+                        linetype = 'DASHED'
+                    elif radial_line_style == 'dot':
+                        linetype = 'DOTTED'
+                    elif radial_line_style == 'dashdot':
+                        linetype = 'DASHDOT'
+                    
                     msp.add_line(start, end, dxfattribs={
-                        'linetype': 'DASHED',
-                        'color': 7  # White/black
+                        'linetype': linetype,
+                        'color': 5  # Blue=5
                     })
                 else:
                     color = 1 if trace['line']['color'] == fold_color_1 else 5  # Red=1, Blue=5
@@ -110,7 +130,17 @@ def create_dxf(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radia
         print(f"Error details: {str(e.__class__.__name__)}")
         raise
 
-def create_svg(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width):
+def create_svg(r, n, fold_color_1=None, fold_color_2=None, radial_color=None, mv_width=None, radial_width=None):
+    # Load configuration from YAML file
+    config = get_pseudo_dome_config()
+    
+    # Use provided values or defaults from config
+    fold_color_1 = fold_color_1 or config['colors']['fold_color_1']
+    fold_color_2 = fold_color_2 or config['colors']['fold_color_2']
+    radial_color = radial_color or config['colors']['radial_color']
+    mv_width = mv_width or config['line_widths']['fold_width']
+    radial_width = radial_width or config['line_widths']['radial_width']
+    radial_line_style = config['line_styles']['radial_line_style']
     traces = generate_pattern(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width)
     
     svg_lines = [
@@ -126,7 +156,14 @@ def create_svg(r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_
         
         if len(x) == 2 and all(coord is not None for coord in x + y):
             x1, y1, x2, y2 = float(x[0]), -float(y[0]), float(x[1]), -float(y[1])
-            stroke_dasharray = '5,5' if dash == 'dash' else 'none'
+            # Apply line style based on configuration
+            stroke_dasharray = 'none'
+            if dash == 'dash' or (color == radial_color and radial_line_style == 'dash'):
+                stroke_dasharray = '5,5'
+            elif dash == 'dot' or (color == radial_color and radial_line_style == 'dot'):
+                stroke_dasharray = '1,3'
+            elif dash == 'dashdot' or (color == radial_color and radial_line_style == 'dashdot'):
+                stroke_dasharray = '5,2,1,2'
             line = f'<line x1="{x1}" y1="{y1}" x2="{x2}" y2="{y2}" stroke="{color}" stroke-width="{width}" stroke-dasharray="{stroke_dasharray}" />'
             svg_lines.append(line)
     

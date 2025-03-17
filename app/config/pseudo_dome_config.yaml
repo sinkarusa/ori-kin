@@ -1,0 +1,16 @@
+# Pseudo-Dome Pattern Configuration
+
+# Colors
+colors:
+  fold_color_1: "rgb(0,255,0)"
+  fold_color_2: "red"
+  radial_color: "blue"
+
+# Line Widths
+line_widths:
+  fold_width: 1.5
+  radial_width: 1.5
+
+# Line Styles
+line_styles:
+  radial_line_style: "solid"  # Options: "solid", "dash", "dot", "dashdot"

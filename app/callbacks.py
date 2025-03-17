@@ -1,8 +1,9 @@
 import numpy as np
 import plotly.graph_objs as go
-from dash import dcc
+from dash import dcc, html
 from dash.dependencies import Input, Output, State
 from dash.exceptions import PreventUpdate
+from dash import callback_context
 
 from .layout import format_parameters
 from .utils.barrel_vault import generate_barrel_vault_pattern
@@ -15,9 +16,29 @@ from .utils.calculations import (
 )
 from .utils.export import create_dxf, create_svg
 from .utils.pattern_generator import generate_pattern
+from .utils.config_loader import get_pseudo_dome_config
 
 
-def register_pseudo_dome_callbacks(app):  
+def register_pseudo_dome_callbacks(app):
+    # Help modal callbacks
+    @app.callback(
+        Output("help-modal", "is_open"),
+        [Input("radius-help-button", "n_clicks"), 
+         Input("segments-help-button", "n_clicks"), 
+         Input("close-help-modal", "n_clicks")],
+        [State("help-modal", "is_open")],
+    )
+    def toggle_help_modal(radius_help_clicks, segments_help_clicks, close_clicks, is_open):
+        ctx = callback_context
+        if not ctx.triggered:
+            return is_open
+        else:
+            button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            if button_id in ["radius-help-button", "segments-help-button"] and not is_open:
+                return True
+            elif button_id == "close-help-modal" and is_open:
+                return False
+            return is_open
     @app.callback(
         [Output('pattern-plot', 'figure'),
         Output('parameter-display', 'children')],
@@ -30,6 +51,8 @@ def register_pseudo_dome_callbacks(app):
         Input('radial-width-input', 'value')]
     )
     def update_pattern(r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width):
+        # Use values from YAML configuration
+        config = get_pseudo_dome_config()
         
         """
         Callback function to update the pattern plot and parameter display.
@@ -111,6 +134,8 @@ Heights (hi):
         prevent_initial_call=True
     )
     def export_dxf(n_clicks, r, n, fold_color_1, fold_color_2, radial_color, fold_width, radial_width):
+        # Use values from YAML configuration
+        config = get_pseudo_dome_config()
         if n_clicks == 0:
             raise PreventUpdate
         
@@ -130,6 +155,8 @@ Heights (hi):
         prevent_initial_call=True
     )
     def export_svg(n_clicks, r, n, fold_color_1, fold_color_2, radial_color, mv_width, radial_width):
+        # Use values from YAML configuration
+        config = get_pseudo_dome_config()
         if n_clicks == 0:
             raise PreventUpdate
         

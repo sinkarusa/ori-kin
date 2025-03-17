@@ -1,9 +1,18 @@
 from dash import Dash, dcc, html
 from dash.dependencies import Input, Output
+import dash_bootstrap_components as dbc
 
 
 def create_app():
-    app = Dash(__name__, suppress_callback_exceptions=True)
+    # Initialize the app with Bootstrap for the modal component
+    app = Dash(
+        __name__,
+        suppress_callback_exceptions=True,
+        external_stylesheets=[
+            dbc.themes.BOOTSTRAP,
+            'https://use.fontawesome.com/releases/v5.15.4/css/all.css'  # For the question mark icon
+        ]
+    )
     
     # Import components after app creation to avoid circular imports
     from .callbacks import register_callbacks
