@@ -134,8 +134,7 @@ def generate_pattern(r, n, fold_color_1=None, fold_color_2=None, radial_color=No
     full_traces = traces.copy()
     
     # import pdb; pdb.set_trace()
-    # for i in range(1, int(num_radial_segments/2)):
-    for i in range(0,2):
+    for i in range(1, int(num_radial_segments/2)):
         rotation = i * 2*alpha[0][0]
         rot_matrix = np.array([[np.cos(rotation), -np.sin(rotation)],
                                [np.sin(rotation), np.cos(rotation)]])
