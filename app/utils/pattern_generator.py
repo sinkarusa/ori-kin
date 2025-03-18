@@ -103,7 +103,16 @@ def generate_pattern(r, n, fold_color_1=None, fold_color_2=None, radial_color=No
     # Generate both halves of the pattern
     generate_half_pattern()
     generate_half_pattern(inverse=True)
-    
+
+    # Remove duplicate traces
+    unique_traces = []
+    unique_coords = set()
+    for i, trace in enumerate(traces):
+        trace_coords = (trace['x'], trace['y'])
+        if trace_coords not in unique_coords:
+            unique_coords.add(trace_coords)
+            unique_traces.append(trace)
+    traces = unique_traces
     # Generate full radial pattern
     full_traces = traces.copy()
     
@@ -145,10 +154,19 @@ def generate_pattern(r, n, fold_color_1=None, fold_color_2=None, radial_color=No
     
     # Only add the cut line if we found a valid trace
     if closest_trace is not None:
+        # cutline coordinates
+        cutline_xpositions = (0, closest_trace['x'][-1])
+        cutline_ypositions = (0, closest_trace['y'][-1])
+
+        # find and remove trace that has the same endpoints as the cutline
+        for i, trace in enumerate(full_traces):
+            if (tuple(trace['x']) == cutline_xpositions) and (tuple(trace['y']) == cutline_ypositions):
+                full_traces.pop(i)
+                break
         # Add a cut line from origin to the endpoint of the trace closest to positive x-axis
         full_traces.append(go.Scatter(
-            x=[0, closest_trace['x'][-1]], 
-            y=[0, closest_trace['y'][-1]], 
+            x=cutline_xpositions, 
+            y=cutline_ypositions, 
             mode='lines', 
             line=dict(color=fold_color_1, width=mv_width)
         ))
