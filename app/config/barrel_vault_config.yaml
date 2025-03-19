@@ -1,0 +1,16 @@
+# Barrel Vault Pattern Configuration
+
+# Colors
+colors:
+  fold_color_1: "rgb(0,255,0)"
+  fold_color_2: "rgb(255,0,0)"
+  connecting_color: "black"
+
+# Line Widths
+line_widths:
+  fold_width: 1.5
+  connecting_width: 1.5
+
+# Line Styles
+line_styles:
+  connecting_line_style: "dash"  # Options: "solid", "dash", "dot", "dashdot"

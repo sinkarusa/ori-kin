@@ -45,3 +45,15 @@ def get_pseudo_dome_config():
     base_dir = Path(__file__).parent.parent
     config_file = os.path.join(base_dir, 'config', 'pseudo_dome_config.yaml')
     return load_config(config_file)
+
+def get_barrel_vault_config():
+    """
+    Get the Barrel Vault pattern configuration
+    
+    Returns:
+        dict: Barrel Vault configuration dictionary
+    """
+    # Get the absolute path to the config file
+    base_dir = Path(__file__).parent.parent
+    config_file = os.path.join(base_dir, 'config', 'barrel_vault_config.yaml')
+    return load_config(config_file)

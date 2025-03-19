@@ -7,10 +7,21 @@ from .calculations import (
     calculate_segment_angle,
     calculate_segment_length,
 )
+from .config_loader import get_barrel_vault_config
 
 
-def generate_barrel_vault_pattern(r, n, m, omega, h, fold_color_1='red', fold_color_2='blue', 
-                               connecting_color='gray', mv_width=2, connecting_width=1):
+def generate_barrel_vault_pattern(r, n, m, omega, h, fold_color_1=None, fold_color_2=None, 
+                               connecting_color=None, mv_width=None, connecting_width=None):
+    # Load configuration from YAML file
+    config = get_barrel_vault_config()
+    
+    # Use provided values or defaults from config
+    fold_color_1 = fold_color_1 or config['colors']['fold_color_1']
+    fold_color_2 = fold_color_2 or config['colors']['fold_color_2']
+    connecting_color = connecting_color or config['colors']['connecting_color']
+    mv_width = mv_width or config['line_widths']['fold_width']
+    connecting_width = connecting_width or config['line_widths']['connecting_width']
+    connecting_line_style = config['line_styles']['connecting_line_style']
     
     # Calculate basic parameters
     theta = calculate_segment_angle(omega, n)
@@ -42,8 +53,18 @@ def generate_barrel_vault_pattern(r, n, m, omega, h, fold_color_1='red', fold_co
                            marker=trace['marker'] if 'marker' in trace else None))
     return full_traces
 
-def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1='red', fold_color_2='blue', 
-                               connecting_color='gray', mv_width=2, connecting_width=1):
+def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold_color_2=None, 
+                               connecting_color=None, mv_width=None, connecting_width=None):
+    # Load configuration from YAML file
+    config = get_barrel_vault_config()
+    
+    # Use provided values or defaults from config
+    fold_color_1 = fold_color_1 or config['colors']['fold_color_1']
+    fold_color_2 = fold_color_2 or config['colors']['fold_color_2']
+    connecting_color = connecting_color or config['colors']['connecting_color']
+    mv_width = mv_width or config['line_widths']['fold_width']
+    connecting_width = connecting_width or config['line_widths']['connecting_width']
+    connecting_line_style = config['line_styles']['connecting_line_style']
     """
     Generate traces for the barrel vault pattern.
     
@@ -179,7 +200,7 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1='red', fol
             x=[vlp,vlp],
             y=[np.min(hl_pos),np.max(hl_pos)],
             mode='lines',
-            line=dict(color=connecting_color, width=connecting_width, dash='solid')
+            line=dict(color=connecting_color, width=connecting_width, dash=connecting_line_style)
         ))
     
     return traces

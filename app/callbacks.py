@@ -165,58 +165,85 @@ Heights (hi):
 
 
 def register_barrel_vault_callbacks(app):
+    # Help modal callbacks
+    @app.callback(
+        Output("barrel-help-modal", "is_open"),
+        [Input("barrel-radius-help-button", "n_clicks"), 
+         Input("barrel-segments-help-button", "n_clicks"),
+         Input("barrel-tiles-help-button", "n_clicks"),
+         Input("barrel-height-help-button", "n_clicks"),
+         Input("barrel-omega-help-button", "n_clicks"),
+         Input("barrel-close-help-modal", "n_clicks")],
+        [State("barrel-help-modal", "is_open")],
+    )
+    def toggle_barrel_help_modal(radius_help_clicks, segments_help_clicks, tiles_help_clicks, 
+                               height_help_clicks, omega_help_clicks, close_clicks, is_open):
+        ctx = callback_context
+        if not ctx.triggered:
+            return is_open
+        else:
+            button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            help_buttons = [
+                "barrel-radius-help-button", 
+                "barrel-segments-help-button",
+                "barrel-tiles-help-button",
+                "barrel-height-help-button",
+                "barrel-omega-help-button"
+            ]
+            if button_id in help_buttons and not is_open:
+                return True
+            elif button_id == "barrel-close-help-modal" and is_open:
+                return False
+            return is_open
     @app.callback(
         [Output('barrel-pattern-plot', 'figure'),
         Output('barrel-parameter-display', 'children'),
-        Output('barrel-height-label', 'children')], 
+        Output('barrel-height-label', 'children'),
+        Output('barrel-height-input', 'value')], 
         [Input('barrel-radius-input', 'value'),
         Input('barrel-segments-input', 'value'),
         Input('barrel-tiles-input', 'value'),
         Input('barrel-omega-input', 'value'),
-        Input('barrel-height-input', 'value'),
-        Input('barrel-fold-color-1-input', 'value'),
-        Input('barrel-fold-color-2-input', 'value'),
-        Input('barrel-connection-color-input', 'value'),
-        Input('barrel-fold-width-input', 'value'),
-        Input('barrel-connection-width-input', 'value')]
+        Input('barrel-height-input', 'value')]
     )
-    def update_barrel_vault_pattern(r, n, m, omega,h, fold_color_1, fold_color_2, 
-                              connection_color, fold_width, connection_width):
+    def update_barrel_vault_pattern(r, n, m, omega, h):
         # Calculate parameters
         theta = calculate_segment_angle(omega, n)
         s = calculate_segment_length(r, theta)
         alpha = calculate_folding_angle(theta)
         h_max = calculate_height(s, alpha)
-        h = np.clip(h,0,h_max)
-
-        barrel_height_label = f"Unit cell height (h) [clamped by hmax={h_max:.2f}]:"
+        
+        # Clamp height value between 0 and h_max
+        h_clamped = np.clip(h, 0, h_max)
+        
+        # Update the height label
+        barrel_height_label = f"Unit cell height (h) [h_max={h_max:.3f}]:"
         
         total_width = n * s
-        total_height = 2 * h
+        total_height = 2 * h_clamped
         
         # Generate pattern
-        traces = generate_barrel_vault_pattern(r, n, m, omega,h,fold_color_1, fold_color_2, 
-                              connection_color, fold_width, connection_width)
+        traces = generate_barrel_vault_pattern(r, n, m, omega, h_clamped)
         
         # Format parameters display
-        parameters_text = format_parameters(r, n, m, omega, theta, s, alpha, h_max,h, total_width, total_height)
+        parameters_text = format_parameters(r, n, m, omega, theta, s, alpha, h_max, h_clamped, total_width, total_height)
         
         layout = go.Layout(
             margin=dict(l=40, r=40, t=40, b=40),
             xaxis=dict(
                 scaleanchor="y",
                 scaleratio=1,
-                range=[-h, total_width + h]
+                range=[-h_clamped, total_width + h_clamped]
             ),
             yaxis=dict(
                 scaleanchor="x",
                 scaleratio=1,
-                range=[-total_height/2 - h/2, total_height/2 + h]
+                range=[-total_height/2 - h_clamped/2, total_height/2 + h_clamped]
             ),
             showlegend=False
         )
         
-        return {'data': traces, 'layout': layout}, parameters_text, barrel_height_label
+        return {'data': traces, 'layout': layout}, parameters_text, barrel_height_label, h_clamped
 
    
 def register_callbacks(app):
