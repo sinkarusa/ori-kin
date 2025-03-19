@@ -14,8 +14,7 @@ from .utils.calculations import (
     calculate_segment_angle,
     calculate_segment_length,
 )
-from .utils.export import create_dxf, create_svg, create_barrel_vault_svg
-from .utils.barrel_vault_export import create_barrel_vault_dxf
+from .utils.export import create_dxf, create_svg, create_barrel_vault_svg, create_barrel_vault_dxf
 from .utils.pattern_generator import generate_pattern
 from .utils.config_loader import get_pseudo_dome_config, get_barrel_vault_config
 
