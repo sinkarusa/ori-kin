@@ -14,9 +14,10 @@ from .utils.calculations import (
     calculate_segment_angle,
     calculate_segment_length,
 )
-from .utils.export import create_dxf, create_svg
+from .utils.export import create_dxf, create_svg, create_barrel_vault_svg
+from .utils.barrel_vault_export import create_barrel_vault_dxf
 from .utils.pattern_generator import generate_pattern
-from .utils.config_loader import get_pseudo_dome_config
+from .utils.config_loader import get_pseudo_dome_config, get_barrel_vault_config
 
 
 def register_pseudo_dome_callbacks(app):
@@ -195,6 +196,56 @@ def register_barrel_vault_callbacks(app):
             elif button_id == "barrel-close-help-modal" and is_open:
                 return False
             return is_open
+            
+    # SVG Export callback
+    @app.callback(
+        Output("barrel-download-svg", "data"),
+        [Input("barrel-export-button", "n_clicks")],
+        [State('barrel-radius-input', 'value'),
+        State('barrel-segments-input', 'value'),
+        State('barrel-tiles-input', 'value'),
+        State('barrel-omega-input', 'value'),
+        State('barrel-height-input', 'value'),
+        State('barrel-fold-color-1-input', 'value'),
+        State('barrel-fold-color-2-input', 'value'),
+        State('barrel-connection-color-input', 'value'),
+        State('barrel-fold-width-input', 'value'),
+        State('barrel-connection-width-input', 'value')],
+        prevent_initial_call=True
+    )
+    def export_barrel_vault_svg(n_clicks, r, n, m, omega, h, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width):
+        # Use values from YAML configuration
+        config = get_barrel_vault_config()
+        if n_clicks == 0:
+            raise PreventUpdate
+        
+        svg_string = create_barrel_vault_svg(r, n, m, omega, h, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width)
+        return dict(content=svg_string, filename="barrel_vault_pattern.svg")
+        
+    # DXF Export callback
+    @app.callback(
+        Output("barrel-download-dxf", "data"),
+        [Input("barrel-export-dxf-button", "n_clicks")],
+        [State('barrel-radius-input', 'value'),
+        State('barrel-segments-input', 'value'),
+        State('barrel-tiles-input', 'value'),
+        State('barrel-omega-input', 'value'),
+        State('barrel-height-input', 'value'),
+        State('barrel-fold-color-1-input', 'value'),
+        State('barrel-fold-color-2-input', 'value'),
+        State('barrel-connection-color-input', 'value'),
+        State('barrel-fold-width-input', 'value'),
+        State('barrel-connection-width-input', 'value')],
+        prevent_initial_call=True
+    )
+    def export_barrel_vault_dxf(n_clicks, r, n, m, omega, h, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width):
+        # Use values from YAML configuration
+        config = get_barrel_vault_config()
+        if n_clicks == 0:
+            raise PreventUpdate
+        
+        dxf_base64 = create_barrel_vault_dxf(r, n, m, omega, h, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width)
+        return dict(content=dxf_base64, filename="barrel_vault_pattern.dxf", type="application/dxf", base64=True)
     @app.callback(
         [Output('barrel-pattern-plot', 'figure'),
         Output('barrel-parameter-display', 'children'),

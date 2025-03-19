@@ -2,8 +2,8 @@
 
 # Colors
 colors:
-  fold_color_1: "rgb(0,255,0)"
-  fold_color_2: "rgb(255,0,0)"
+  fold_color_1: "rgb(255,0,0)"
+  fold_color_2: "rgb(0,0,255)"
   connecting_color: "black"
 
 # Line Widths
@@ -13,4 +13,4 @@ line_widths:
 
 # Line Styles
 line_styles:
-  connecting_line_style: "dash"  # Options: "solid", "dash", "dot", "dashdot"
+  connecting_line_style: "solid"  # Options: "solid", "dash", "dot", "dashdot"

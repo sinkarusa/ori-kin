@@ -95,10 +95,13 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
         x=[current_x, next_x],
         y=[current_y, next_y],
         mode='lines',
-        line=dict(color='green', width=mv_width)
+        line=dict(color=fold_color_1, width=mv_width)
     ))
-    
-    
+
+    # valley folds start and end points
+    valley_fold_traces = []
+    valley_fold_traces.append([(next_x, next_y)])
+
     n_reps = int(np.floor(n/2)) if n%2 else int(n/2)-1
     current_x_sym_org = next_x
     current_y_sym_org = next_y
@@ -107,6 +110,9 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
         y_dir = 1 if j==0 else -1
         current_x = current_x_sym_org
         current_y = current_y_sym_org
+        # center valley fold 
+        center_valley_fold_start = (current_x, current_y)
+        upper_and_lower_valley_fold_start = (0, y_dir*2*h)
         for i in range(n_reps):
             next_x = current_x + s_angled
             next_y = current_y + y_dir*2*h
@@ -115,7 +121,7 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                 x=[current_x, next_x],
                 y=[current_y, next_y],
                 mode='lines',
-                line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
+                line=dict(color=fold_color_1, width=mv_width)
             ))
             current_x = next_x
             current_y = next_y
@@ -128,8 +134,9 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                     x=[current_x, next_x],
                     y=[current_y, next_y],
                     mode='lines',
-                    line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
+                    line=dict(color=fold_color_1, width=mv_width)
                 ))
+            
             #lower diagonal
             current_x = next_x
             current_y = next_y
@@ -140,7 +147,7 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                 x=[current_x, next_x],
                 y=[current_y, next_y],
                 mode='lines',
-                line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
+                line=dict(color=fold_color_1, width=mv_width)
             ))
             current_x = next_x
             current_y = next_y
@@ -153,7 +160,7 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                     x=[current_x, next_x],
                     y=[current_y, next_y],
                     mode='lines',
-                    line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
+                    line=dict(color=fold_color_1, width=mv_width)
                 ))
             current_x = next_x
             current_y = next_y
@@ -165,7 +172,7 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                 x=[current_x, next_x],
                 y=[current_y, next_y],
                 mode='lines',
-                line=dict(color=fold_color_1 if j%2 else fold_color_2, width=mv_width)
+                line=dict(color=fold_color_1, width=mv_width)
             ))
             current_x = next_x
             current_y = next_y
@@ -178,11 +185,11 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                     x=[current_x, next_x],
                     y=[current_y, next_y],
                     mode='lines',
-                    line=dict(color='green', width=mv_width)
+                    line=dict(color=fold_color_1, width=mv_width)
                 ))
             current_x = next_x
             current_y = next_y
-    # horizontal lines
+    # horizontal lines i.e. Valley folds
     hl_pos = [-2*h,0,2*h]
     total_length = n*s
     for hlp in hl_pos:
@@ -190,7 +197,7 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
             x=[0, total_length],
             y=[hlp,hlp],
             mode='lines',
-            line=dict(color=connecting_color, width=connecting_width, dash='dash')
+            line=dict(color=fold_color_2, width=mv_width, dash='solid')
         ))
    
     # vertical lines
