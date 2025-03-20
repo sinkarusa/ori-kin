@@ -238,19 +238,22 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                 mode='lines',
                 line=dict(color=fold_color_1, width=mv_width)
             ))
+
+            
             current_x = next_x
             current_y = next_y
             
             next_x = current_x + s-s_angled/2
             next_y = current_y
-            if next_x>current_x:
-                # trapezoid straigth section
-                traces.append(go.Scatter(
-                    x=[current_x, next_x],
-                    y=[current_y, next_y],
-                    mode='lines',
-                    line=dict(color=fold_color_1, width=mv_width)
-                ))
+            
+            # if next_x>current_x:
+            # trapezoid straigth section
+            traces.append(go.Scatter(
+                x=[current_x, next_x],
+                y=[current_y, next_y],
+                mode='lines',
+                line=dict(color=fold_color_1, width=mv_width)
+            ))
             if (i==n_reps-1):
                 traces.append(go.Scatter(
                     x=[center_valley_fold_start[0], next_x],
@@ -262,13 +265,13 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
             current_x = next_x
             current_y = next_y
 
-        # add upper valley fold 
-        traces.append(go.Scatter(
-            x=[upper_and_lower_valley_fold_start[0], next_x],
-            y=[upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
-            mode='lines',
-            line=dict(color=valley_fold_color, width=mv_width, dash='solid')
-        ))
+        # # add upper valley fold 
+        # traces.append(go.Scatter(
+        #     x=[upper_and_lower_valley_fold_start[0], next_x],
+        #     y=[upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
+        #     mode='lines',
+        #     line=dict(color=valley_fold_color, width=mv_width, dash='solid')
+        # ))
     
     # horizontal lines i.e. Valley folds
     hl_pos = [-2*h,0,2*h]
