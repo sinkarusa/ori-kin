@@ -14,7 +14,7 @@ def create_landing_layout():
             dcc.Link(
                 html.Div([
                     html.Img(src='/assets/pseudo_dome.png', style={'height': '200px'}),
-                    html.P("Pseudo-Dome Pattern Generator"),
+                    html.P("Pseudo-Dome"),
                 ], style={'textAlign': 'center', 'cursor': 'pointer'}),
                 href='/pseudo-dome'
             ),
@@ -23,7 +23,7 @@ def create_landing_layout():
             dcc.Link(
                 html.Div([
                     html.Img(src='/assets/single_center_barrel_vault.png', style={'height': '200px'}),
-                    html.P("Single-center Barrel Vault Pattern Generator"),
+                    html.P("Single-center Barrel Vault"),
                 ], style={'textAlign': 'center', 'cursor': 'pointer'}),
                 href='/barrel-vault'
             ),
@@ -32,7 +32,8 @@ def create_landing_layout():
             dcc.Link(
                 html.Div([
                     html.Img(src='/assets/double_center_barrel_vault.png', style={'height': '200px'}),
-                    html.P("Double-center Barrel Vault Pattern Generator"),
+                    html.P("Double-center Barrel Vault", style={'margin-bottom': '5px'}),
+                    html.P("(coming soon)", style={'font-size': '12px', 'color': '#666'}),
                 ], style={'textAlign': 'center', 'cursor': 'pointer'}),
                 href=''
             ),
