@@ -22,10 +22,19 @@ def create_landing_layout():
             # Barrel Vault
             dcc.Link(
                 html.Div([
-                    html.Img(src='/assets/barrel_vault.png', style={'height': '200px'}),
-                    html.P("Barrel Vault Pattern Generator"),
+                    html.Img(src='/assets/single_center_barrel_vault.png', style={'height': '200px'}),
+                    html.P("Single-center Barrel Vault Pattern Generator"),
                 ], style={'textAlign': 'center', 'cursor': 'pointer'}),
                 href='/barrel-vault'
+            ),
+
+            # Double-center Barrel Vault
+            dcc.Link(
+                html.Div([
+                    html.Img(src='/assets/double_center_barrel_vault.png', style={'height': '200px'}),
+                    html.P("Double-center Barrel Vault Pattern Generator"),
+                ], style={'textAlign': 'center', 'cursor': 'pointer'}),
+                href=''
             ),
         ], style={
             'display': 'flex',
