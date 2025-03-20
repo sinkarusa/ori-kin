@@ -33,6 +33,19 @@ def create_landing_layout():
             'gap': '50px',
             'alignItems': 'center'
         }),
+
+        # Footer with copyright and GitHub link
+        html.Div([
+            html.P([
+                "Copyright (C) [2024-2025] ",
+                html.A("Andrée Sonad Karaveli Kartal", href="https://askk-arch.com.tr", target="_blank"),
+                ", ",
+                html.A("Sinan Karaveli", href="https://github.com/sinkarusa", target="_blank"),
+                html.A([
+                    html.Img(src='/assets/github-mark.png', style={'height': '20px', 'width': '20px', 'margin-left': '10px'}),
+                ], href='https://github.com/sinkarusa/ori-kin', target='_blank', style={'display': 'inline-block', 'vertical-align': 'middle'}),
+            ], style={'text-align': 'center', 'margin-top': '60px', 'font-size': '14px'}),
+        ], style={'text-align': 'center', 'padding-bottom': '40px', 'border-top': '1px solid #eee', 'margin-top': '60px'}),
     ])
 
 def create_pseudo_dome_layout():

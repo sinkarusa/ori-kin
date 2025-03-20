@@ -71,14 +71,12 @@ Adjust parameters in the web interface:
 - Suitable for manufacturing
 
 ## License
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 This project is licensed under the GNU General Public License v3.0 - see the [COPYING](COPYING) file for details.
 
 Copyright (C) [2024-2025] [Andrée Sonad Karaveli Kartal](https://askk-arch.com.tr), [Sinan Karaveli](https://github.com/sinkarusa)
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+
