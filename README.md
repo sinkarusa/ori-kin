@@ -4,12 +4,11 @@
 [![Python](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Poetry](https://img.shields.io/endpoint?url=https://python-poetry.org/badge/v0.json)](https://python-poetry.org/)
 
-A web application for generating pseudo-dome patterns with customizable parameters. This tool helps create precise geometric patterns for architectural and design purposes.
+A web application for generating Pseudo-Dome and Barrel Vault patterns with customizable parameters. This tool helps create precise geometric patterns for architectural and design purposes. These patterns were developed by Andrée Sonad Karaveli Kartal ([askk-arch.com.tr](https://askk-arch.com.tr)) for her thesis (located in docs).
 
 ## Features
 
-- Interactive pattern generation
-- Customizable parameters (radius, segments, colors)
+- Interactive, custimaziable Pseudo-Dome and Barrel Vault pattern generators
 - Export to SVG and DXF formats
 - Real-time visualization
 - Detailed parameter calculations
@@ -18,7 +17,7 @@ A web application for generating pseudo-dome patterns with customizable paramete
 
 ### Prerequisites
 
-- Python 3.9+
+- Python 3.11+
 - Poetry
 
 ### Setup
@@ -49,13 +48,6 @@ Visit `http://localhost:8050` in your web browser.
 
 The application is configured for deployment on Render.com using Poetry and Gunicorn.
 
-## Configuration
-
-Adjust parameters in the web interface:
-- Radius (r)
-- Number of segments (n)
-- Colors for different fold types
-- Line widths
 
 ## Export Options
 
