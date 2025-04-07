@@ -215,14 +215,14 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                 next_x = current_x + first_flat_segment_length
 
             
-            if next_x>current_x:
-                # trapezoid straigth section
-                traces.append(go.Scatter(
-                    x=[current_x, next_x],
-                    y=[current_y, next_y],
-                    mode='lines',
-                    line=dict(color=fold_color_1, width=mv_width)
-                ))
+            # if next_x>current_x:
+            # trapezoid straigth section
+            traces.append(go.Scatter(
+                x=[current_x, next_x],
+                y=[current_y, next_y],
+                mode='lines',
+                line=dict(color=fold_color_1, width=mv_width)
+            ))
             current_x = next_x
             current_y = next_y
 
@@ -266,15 +266,15 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
             current_x = next_x
             current_y = next_y
 
-        else:
+        # else:
             # add center valley fold
             # center_valley_fold_start[0] = current_x
-            traces.append(go.Scatter(
-                x=[upper_and_lower_valley_fold_start[0], next_x],
-                y=[upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
-                mode='lines',
-                line=dict(color=valley_fold_color, width=mv_width, dash='solid')
-            ))
+        traces.append(go.Scatter(
+            x=[upper_and_lower_valley_fold_start[0], next_x],
+            y=[upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
+            mode='lines',
+            line=dict(color=valley_fold_color, width=mv_width, dash='solid')
+        ))
             
 
     
