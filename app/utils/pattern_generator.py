@@ -164,15 +164,14 @@ def generate_pattern(r, n, fold_color_1=None, fold_color_2=None, radial_color=No
     closest_trace = None
     max_x = -float('inf')
     
+    # last cut line should go from center to max_x, always
     for trace in full_traces:
         # Check if this trace's endpoint has a larger x value
         if len(trace['x']) > 1 and trace['x'][-1] > max_x:
             max_x = trace['x'][-1]
-            closest_trace = trace
     
-    # If we couldn't find a suitable trace, use the first one as fallback
-    if closest_trace is None and len(full_traces) > 0:
-        closest_trace = full_traces[0]
+    closest_trace = full_traces[0]
+    closest_trace['x'] = [closest_trace['x'][0], max_x]
     # reverse order of traces
     full_traces.reverse()
     
