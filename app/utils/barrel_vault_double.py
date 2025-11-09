@@ -6,6 +6,9 @@ from .calculations import (
     calculate_height,
     calculate_segment_angle,
     calculate_segment_length,
+    calculate_alpha1_angle,
+    calculate_alpha2_angle,
+    calculate_beta_angle
 )
 from .config_loader import get_double_barrel_vault_config
 from .common_utils import remove_duplicate_traces, ROUNDING_DECIMAL
@@ -46,9 +49,9 @@ def generate_double_barrel_vault_pattern(r, n, m, omega, a, fold_color_1=None, f
     # Calculate basic parameters
     theta = calculate_segment_angle(omega, n)
     s = calculate_segment_length(r, theta)
-    alpha1 = (a / (4*r*n)) 
-    beta = (a/r) - (a/(2*r*n))
-    alpha2 = np.pi/2 - beta/2
+    alpha1 = calculate_alpha1_angle(a,r,n)
+    beta = calculate_beta_angle(a,r,n)
+    alpha2 = calculate_alpha2_angle(beta)
     h = calculate_height(s, alpha1)  # Calculate h from geometry
     
     unit_cell_traces, hl_pos, total_length = generate_double_barrel_vault_pattern_unit_cell(s, n, h, alpha1,alpha2,beta, a,

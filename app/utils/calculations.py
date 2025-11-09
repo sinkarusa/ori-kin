@@ -53,3 +53,16 @@ def calculate_folding_angle(theta):
 def calculate_height(s, alpha):
     """Calculate height h using equation 3.10"""
     return np.tan(np.radians(alpha)) * (s/2)
+
+def calculate_alpha1_angle(a,r,n):
+    """Calculate double barrel vault's alpha1 angle using ASKK's equation from notes"""
+    return (a / (4*r*n)) % 360 #% (2*np.pi)
+
+def calculate_alpha2_angle(beta):
+    """Calculate double barrel vault's alpha2 angle using ASKK's equation from notes"""
+    return 90 - beta/2
+
+def calculate_beta_angle(a,r,n):
+    """Calculate double barrel vault's beta angle using ASKK's equation from notes"""
+    return ((a/r) - (a/(2*r*n))) % 360 #% (2*np.pi)
+        

@@ -14,6 +14,9 @@ from .utils.calculations import (
     calculate_parameters,
     calculate_segment_angle,
     calculate_segment_length,
+    calculate_alpha1_angle,
+    calculate_alpha2_angle,
+    calculate_beta_angle
 )
 from .utils.export import (
     create_dxf, create_svg,
@@ -401,8 +404,12 @@ def register_double_barrel_vault_callbacks(app):
         # Calculate parameters
         theta = calculate_segment_angle(omega, n)
         s = calculate_segment_length(r, theta)
-        alpha = calculate_folding_angle(theta)
-        h = calculate_height(s, alpha)
+
+        # Calculate double barrel vault specific parameters
+        alpha1 = calculate_alpha1_angle(a,r,n)
+        beta = calculate_beta_angle(a,r,n)
+        alpha2 = calculate_alpha2_angle(beta)
+        h = calculate_height(s, alpha1)
 
         total_width = n * s
         total_height = 2 * h
@@ -410,7 +417,7 @@ def register_double_barrel_vault_callbacks(app):
         # Generate pattern
         traces = generate_double_barrel_vault_pattern(r, n, m, omega, a)
 
-        # Format parameters display - simplified for double barrel vault
+        # Format parameters display - with separate alpha1 and alpha2
         parameters_text = f"""
 Radius (r): {r:.2f}
 Segments (n): {n}
@@ -421,7 +428,9 @@ Distance between centers (a): {a:.2f}
 Calculated Parameters:
 Segment angle (θ): {theta:.2f}°
 Segment length (s): {s:.2f}
-Folding angle (α): {alpha:.2f}°
+Folding angle α₁: {alpha1:.2f}°
+Folding angle α₂: {alpha2:.2f}°
+Angle β: {beta:.2f}°
 Height (h): {h:.2f}
 
 Pattern Properties:
