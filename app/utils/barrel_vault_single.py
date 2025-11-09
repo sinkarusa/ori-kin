@@ -8,8 +8,9 @@ from .calculations import (
     calculate_segment_length,
 )
 from .config_loader import get_barrel_vault_config
+from .common_utils import remove_duplicate_traces, ROUNDING_DECIMAL
 
-rounding_decimal = 4
+rounding_decimal = ROUNDING_DECIMAL
 
 def generate_barrel_vault_pattern(r, n, m, omega, h, fold_color_1=None, fold_color_2=None, 
                                connecting_color=None, mv_width=None, connecting_width=None):
@@ -53,17 +54,7 @@ def generate_barrel_vault_pattern(r, n, m, omega, h, fold_color_1=None, fold_col
                            line=trace['line'] if 'line' in trace else None,
                            marker=trace['marker'] if 'marker' in trace else None))
         # Remove duplicate traces
-    unique_traces = []
-    unique_coords = set()
-    for i, trace in enumerate(full_traces):
-        trace_coords = (np.round(trace['x'][0], rounding_decimal),
-                        np.round(trace['y'][0], rounding_decimal),
-                        np.round(trace['x'][-1], rounding_decimal),
-                        np.round(trace['y'][-1], rounding_decimal))
-        if trace_coords not in unique_coords:
-            unique_coords.add(trace_coords)
-            unique_traces.append(trace)
-    full_traces = unique_traces
+    full_traces = remove_duplicate_traces(full_traces, rounding_decimal)
 
     # change to color of top and bottom most horizontal traces
     y_bottom = hl_pos[0]*(2*m-1)
@@ -263,14 +254,14 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                     line=dict(color=valley_fold_color, width=mv_width, dash='solid')
                 ))
         
-            current_x = next_x
-            current_y = next_y
+            # current_x = next_x
+            # current_y = next_y
 
         # else:
             # add center valley fold
             # center_valley_fold_start[0] = current_x
         traces.append(go.Scatter(
-            x=[upper_and_lower_valley_fold_start[0], next_x],
+            x=[upper_and_lower_valley_fold_start[0], current_x],
             y=[upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
             mode='lines',
             line=dict(color=valley_fold_color, width=mv_width, dash='solid')
@@ -300,15 +291,5 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
         ))
     
     # Remove duplicate traces
-    unique_traces = []
-    unique_coords = set()
-    for i, trace in enumerate(traces):
-        trace_coords = (np.round(trace['x'][0], rounding_decimal),
-                        np.round(trace['y'][0], rounding_decimal),
-                        np.round(trace['x'][-1], rounding_decimal),
-                        np.round(trace['y'][-1], rounding_decimal))
-        if trace_coords not in unique_coords:
-            unique_coords.add(trace_coords)
-            unique_traces.append(trace)
-    traces = unique_traces
+    traces = remove_duplicate_traces(traces, rounding_decimal)
     return traces, hl_pos, total_length

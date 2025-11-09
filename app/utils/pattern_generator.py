@@ -3,8 +3,9 @@ import plotly.graph_objs as go
 
 from .calculations import calculate_parameters
 from .config_loader import get_pseudo_dome_config
+from .common_utils import remove_duplicate_traces, ROUNDING_DECIMAL
 
-rounding_decimal = 4
+rounding_decimal = ROUNDING_DECIMAL
 
 def calculate_slope(x1, y1, x2, y2):
     '''Calc slop, return Inf if horizontal'''
@@ -119,17 +120,7 @@ def generate_pattern(r, n, fold_color_1=None, fold_color_2=None, radial_color=No
     generate_half_pattern(inverse=True)
 
     # Remove duplicate traces
-    unique_traces = []
-    unique_coords = set()
-    for i, trace in enumerate(traces):
-        trace_coords = (np.round(trace['x'][0], rounding_decimal),
-                        np.round(trace['y'][0], rounding_decimal),
-                        np.round(trace['x'][-1], rounding_decimal),
-                        np.round(trace['y'][-1], rounding_decimal))
-        if trace_coords not in unique_coords:
-            unique_coords.add(trace_coords)
-            unique_traces.append(trace)
-    traces = unique_traces
+    traces = remove_duplicate_traces(traces, rounding_decimal)
     # Generate full radial pattern
     full_traces = traces.copy()
     
@@ -148,17 +139,7 @@ def generate_pattern(r, n, fold_color_1=None, fold_color_2=None, radial_color=No
                                         marker=trace['marker'] if 'marker' in trace else None))
 
     # Remove duplicate traces
-    unique_traces = []
-    unique_coords = set()
-    for i, trace in enumerate(full_traces):
-        trace_coords = (np.round(trace['x'][0], rounding_decimal),
-                        np.round(trace['y'][0], rounding_decimal),
-                        np.round(trace['x'][-1], rounding_decimal),
-                        np.round(trace['y'][-1], rounding_decimal))
-        if trace_coords not in unique_coords:
-            unique_coords.add(trace_coords)
-            unique_traces.append(trace)
-    full_traces = unique_traces
+    full_traces = remove_duplicate_traces(full_traces, rounding_decimal)
     # add a cut line to the end
     # find the trace with ending point closest to positive x axis
     closest_trace = None
