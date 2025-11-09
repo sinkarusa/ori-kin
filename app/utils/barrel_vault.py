@@ -263,14 +263,14 @@ def generate_barrel_vault_pattern_unit_cell(s,n,h,alpha, fold_color_1=None, fold
                     line=dict(color=valley_fold_color, width=mv_width, dash='solid')
                 ))
         
-            current_x = next_x
-            current_y = next_y
+            # current_x = next_x
+            # current_y = next_y
 
         # else:
             # add center valley fold
             # center_valley_fold_start[0] = current_x
         traces.append(go.Scatter(
-            x=[upper_and_lower_valley_fold_start[0], next_x],
+            x=[upper_and_lower_valley_fold_start[0], current_x],
             y=[upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
             mode='lines',
             line=dict(color=valley_fold_color, width=mv_width, dash='solid')
