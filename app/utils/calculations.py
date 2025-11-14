@@ -56,13 +56,14 @@ def calculate_height(s, alpha):
 
 def calculate_alpha1_angle(a,r,n):
     """Calculate double barrel vault's alpha1 angle using ASKK's equation from notes"""
-    return (a / (4*r*n)) % 360 #% (2*np.pi)
+    return np.degrees(np.acos(a / (2*r))/(2*n))
 
 def calculate_alpha2_angle(beta):
     """Calculate double barrel vault's alpha2 angle using ASKK's equation from notes"""
-    return 90 - beta/2
+    return (90 - beta)/2
 
 def calculate_beta_angle(a,r,n):
     """Calculate double barrel vault's beta angle using ASKK's equation from notes"""
-    return ((a/r) - (a/(2*r*n))) % 360 #% (2*np.pi)
+    invcos_a2r = np.acos(a / (2*r)) 
+    return np.degrees((2*invcos_a2r) - invcos_a2r/n) 
         

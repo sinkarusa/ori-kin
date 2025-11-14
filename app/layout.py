@@ -402,7 +402,7 @@ def create_double_barrel_vault_layout():
                             }
                         ),
                     ], style={'margin-bottom': '5px'}),
-                    dcc.Input(id='double-barrel-distance-input', type='number', value=1000, min=10, step=1,
+                    dcc.Input(id='double-barrel-distance-input', type='number', value=1, min=0, step=0.01,
                              style={'width': '100%', 'margin-bottom': '5px'})
                 ], style={'margin-bottom': '15px'}),
                 html.Div([
