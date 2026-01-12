@@ -13,6 +13,23 @@ A web application for generating Pseudo-Dome and Barrel Vault patterns with cust
 - Real-time visualization
 - Detailed parameter calculations
 
+## Demo
+
+You can demo the app here: https://ori-kin.onrender.com/
+
+### Demo Usage
+
+**Pattern Generation**
+* Select a pattern
+* Adjust parameters
+* Export SVG
+
+**Pattern Visualization**
+* Go to [Origami Simulator by Amanda Ghassaei](https://origamisimulator.org/)
+* **File** -> **Import** and Select the exported SVG
+* When prompted for **Vertex merge tolerance (px)**, enter a value `~0.1` (if using default pattern generation scale parameters, may need to tweak)
+* You can visualize the pattern in 3D while Folding it
+
 ## Installation
 
 ### Prerequisites
