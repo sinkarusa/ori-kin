@@ -1,0 +1,26 @@
+{
+  "name": "ori-kin-web",
+  "version": "1.0.0",
+  "description": "Ori-Kin Origami Pattern Generator - Browser-based TypeScript implementation",
+  "main": "src/app.ts",
+  "scripts": {
+    "dev": "webpack serve --mode development",
+    "build": "webpack --mode production",
+    "serve": "python -m http.server 8181 -d dist"
+  },
+  "keywords": ["origami", "patterns", "pseudo-dome", "barrel-vault"],
+  "author": "Andrée Sonad Karaveli Kartal, Sinan Karaveli",
+  "license": "GPL-3.0",
+  "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
+    "html-webpack-plugin": "^5.5.3",
+    "ts-loader": "^9.4.4",
+    "typescript": "^5.2.2",
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  },
+  "dependencies": {
+    "plotly.js-dist-min": "^2.27.0"
+  }
+}
