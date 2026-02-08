@@ -6,17 +6,31 @@
 
 A web application for generating Pseudo-Dome and Barrel Vault patterns with customizable parameters. This tool helps create precise geometric patterns for architectural and design purposes. These patterns were developed by Andrée Sonad Karaveli Kartal ([askk-arch.com.tr](https://askk-arch.com.tr)) for her thesis (located in docs).
 
+## Available Versions
+
+This project is available in two implementations:
+
+### 🌐 TypeScript Web App (Recommended)
+- **Live Demo**: [https://sinkarusa.github.io/ori-kin/](https://sinkarusa.github.io/ori-kin/) *(GitHub Pages)*
+- Pure client-side application (runs entirely in your browser)
+- No server required
+- Faster performance
+- Located in `web-app/` directory
+
+### 🐍 Python/Dash Application
+- **Live Demo**: [https://ori-kin.onrender.com/](https://ori-kin.onrender.com/) *(Render.com)*
+- Server-side Python application using Plotly/Dash
+- Full-featured implementation
+- Located in root directory
+
+Both versions provide the same core functionality with identical pattern generation algorithms.
+
 ## Features
 
-- Interactive, custimaziable Pseudo-Dome and Barrel Vault pattern generators
+- Interactive, customizable Pseudo-Dome and Barrel Vault pattern generators
 - Export to SVG and DXF formats
 - Real-time visualization
 - Detailed parameter calculations
-- TypeScript/JavaScript implementation for browser-based usage (`web-app/`)
-
-## Demo
-
-You can demo the app here: https://ori-kin.onrender.com/
 
 ### Demo Usage
 
@@ -31,15 +45,33 @@ You can demo the app here: https://ori-kin.onrender.com/
 * When prompted for **Vertex merge tolerance (px)**, enter a value `~0.1` (if using default pattern generation scale parameters, may need to tweak)
 * You can visualize the pattern in 3D while Folding it
 
-## Installation
+## Installation & Usage
 
-### Prerequisites
+### TypeScript Web App (Browser-based)
 
+No installation required! Just visit the [live demo](https://sinkarusa.github.io/ori-kin/).
+
+**Local Development:**
+```bash
+cd web-app
+npm install
+npm run dev
+```
+Visit `http://localhost:8181` in your browser.
+
+**Build for Production:**
+```bash
+npm run build
+# Output in web-app/dist/
+```
+
+### Python/Dash Application (Server-based)
+
+**Prerequisites:**
 - Python 3.11+
 - Poetry
 
-### Setup
-
+**Setup:**
 ```bash
 # Clone the repository
 git clone https://github.com/sinkarusa/ori-kin.git
@@ -52,18 +84,13 @@ poetry install
 poetry shell
 ```
 
-## Usage
-
-### Development Server
-
+**Development Server:**
 ```bash
 python run.py
 ```
+Visit `http://localhost:8050` in your browser.
 
-Visit `http://localhost:8050` in your web browser.
-
-### Production Deployment
-
+**Production Deployment:**
 The application is configured for deployment on Render.com using Poetry and Gunicorn.
 
 
