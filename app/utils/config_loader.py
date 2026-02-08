@@ -49,11 +49,23 @@ def get_pseudo_dome_config():
 def get_barrel_vault_config():
     """
     Get the Barrel Vault pattern configuration
-    
+
     Returns:
         dict: Barrel Vault configuration dictionary
     """
     # Get the absolute path to the config file
     base_dir = Path(__file__).parent.parent
     config_file = os.path.join(base_dir, 'config', 'barrel_vault_config.yaml')
+    return load_config(config_file)
+
+def get_double_barrel_vault_config():
+    """
+    Get the Double Barrel Vault pattern configuration
+
+    Returns:
+        dict: Double Barrel Vault configuration dictionary
+    """
+    # Get the absolute path to the config file
+    base_dir = Path(__file__).parent.parent
+    config_file = os.path.join(base_dir, 'config', 'double_barrel_vault_config.yaml')
     return load_config(config_file)

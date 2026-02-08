@@ -32,10 +32,9 @@ def create_landing_layout():
             dcc.Link(
                 html.Div([
                     html.Img(src='/assets/double_center_barrel_vault.png', style={'height': '200px'}),
-                    html.P("Double-center Barrel Vault", style={'margin-bottom': '5px'}),
-                    html.P("(coming soon)", style={'font-size': '12px', 'color': '#666'}),
+                    html.P("Double-center Barrel Vault"),
                 ], style={'textAlign': 'center', 'cursor': 'pointer'}),
-                href=''
+                href='/double-barrel-vault'
             ),
         ], style={
             'display': 'flex',
@@ -308,6 +307,155 @@ def create_barrel_vault_layout():
             ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '10px'})
         ], style={'display': 'flex', 'justify-content': 'space-between'})
     ])
+
+def create_double_barrel_vault_layout():
+    return html.Div([
+        html.H1("Double Barrel Vault Pattern Generator", style={'text-align': 'center', 'margin-bottom': '20px'}),
+
+        # Modal for help information
+        dbc.Modal([
+            dbc.ModalHeader("Double Barrel Vault Pattern Information"),
+            dbc.ModalBody([
+                html.Img(src='/assets/double_center_barrel_vault.png', style={'width': '100%', 'margin-top': '15px'})
+            ]),
+            dbc.ModalFooter(
+                dbc.Button("Close", id="double-barrel-close-help-modal", className="ml-auto")
+            ),
+        ], id="double-barrel-help-modal", size="lg"),
+        html.Div([
+            # Input controls column
+            html.Div([
+                html.Div([
+                    html.Div([
+                        html.Label("Radius (r):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                        html.Button(
+                            html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
+                            id="double-barrel-radius-help-button",
+                            style={
+                                'background': 'none',
+                                'border': 'none',
+                                'color': '#007bff',
+                                'cursor': 'pointer',
+                                'vertical-align': 'middle',
+                                'padding': '0',
+                                'margin-left': '5px'
+                            }
+                        ),
+                    ], style={'margin-bottom': '5px'}),
+                    dcc.Input(id='double-barrel-radius-input', type='number', value=2, min=1, step=0.1,
+                             style={'width': '100%', 'margin-bottom': '5px'})
+                ], style={'margin-bottom': '15px'}),
+                html.Div([
+                    html.Div([
+                        html.Label("Number of segments (n):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                        html.Button(
+                            html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
+                            id="double-barrel-segments-help-button",
+                            style={
+                                'background': 'none',
+                                'border': 'none',
+                                'color': '#007bff',
+                                'cursor': 'pointer',
+                                'vertical-align': 'middle',
+                                'padding': '0',
+                                'margin-left': '5px'
+                            }
+                        ),
+                    ], style={'margin-bottom': '5px'}),
+                    dcc.Input(id='double-barrel-segments-input', type='number', value=6, min=3, max=20, step=1,
+                             style={'width': '100%', 'margin-bottom': '5px'})
+                ], style={'margin-bottom': '15px'}),
+                html.Div([
+                    html.Div([
+                        html.Label("Number of tiles (m):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                        html.Button(
+                            html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
+                            id="double-barrel-tiles-help-button",
+                            style={
+                                'background': 'none',
+                                'border': 'none',
+                                'color': '#007bff',
+                                'cursor': 'pointer',
+                                'vertical-align': 'middle',
+                                'padding': '0',
+                                'margin-left': '5px'
+                            }
+                        ),
+                    ], style={'margin-bottom': '5px'}),
+                    dcc.Input(id='double-barrel-tiles-input', type='number', value=1, min=1, max=20, step=1,
+                             style={'width': '100%', 'margin-bottom': '5px'})
+                ], style={'margin-bottom': '15px'}),
+                html.Div([
+                    html.Div([
+                        html.Label("Distance between centers (a):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                        html.Button(
+                            html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
+                            id="double-barrel-distance-help-button",
+                            style={
+                                'background': 'none',
+                                'border': 'none',
+                                'color': '#007bff',
+                                'cursor': 'pointer',
+                                'vertical-align': 'middle',
+                                'padding': '0',
+                                'margin-left': '5px'
+                            }
+                        ),
+                    ], style={'margin-bottom': '5px'}),
+                    dcc.Input(id='double-barrel-distance-input', type='number', value=1, min=0, step=0.01,
+                             style={'width': '100%', 'margin-bottom': '5px'})
+                ], style={'margin-bottom': '15px'}),
+                html.Div([
+                    html.Div([
+                        html.Label("Central angle (Ω):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                        html.Button(
+                            html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
+                            id="double-barrel-omega-help-button",
+                            style={
+                                'background': 'none',
+                                'border': 'none',
+                                'color': '#007bff',
+                                'cursor': 'pointer',
+                                'vertical-align': 'middle',
+                                'padding': '0',
+                                'margin-left': '5px'
+                            }
+                        ),
+                    ], style={'margin-bottom': '5px'}),
+                    dcc.Input(id='double-barrel-omega-input', type='number', value=180, min=1, max=360, step=1,
+                             style={'width': '100%', 'margin-bottom': '5px'})
+                ], style={'margin-bottom': '20px'}),
+                # Hidden inputs for configuration values (loaded from YAML)
+                html.Div([
+                    dcc.Input(id='double-barrel-fold-color-1-input', type='hidden', value=''),
+                    dcc.Input(id='double-barrel-fold-color-2-input', type='hidden', value=''),
+                    dcc.Input(id='double-barrel-connection-color-input', type='hidden', value=''),
+                    dcc.Input(id='double-barrel-fold-width-input', type='hidden', value=''),
+                    dcc.Input(id='double-barrel-connection-width-input', type='hidden', value='')
+                ]),
+                html.Div([
+                    html.Button("Export SVG", id="double-barrel-export-button", n_clicks=0,
+                                  style={'margin-right': '10px', 'padding': '8px 15px', 'background-color': '#4CAF50', 'color': 'white', 'border': 'none', 'border-radius': '4px'}),
+                    html.Button("Export DXF", id="double-barrel-export-dxf-button", n_clicks=0,
+                                  style={'padding': '8px 15px', 'background-color': '#2196F3', 'color': 'white', 'border': 'none', 'border-radius': '4px'}),
+                    dcc.Download(id="double-barrel-download-svg"),
+                    dcc.Download(id="double-barrel-download-dxf")
+                ], style={'margin-bottom': '20px', 'display': 'flex', 'justify-content': 'center'})
+                ], style={'width': '20%', 'display': 'inline-block', 'vertical-align': 'top', 'padding-left': '30px'}),
+
+            # Plot column
+            html.Div([
+                dcc.Graph(id='double-barrel-pattern-plot')
+            ], style={'width': '50%', 'display': 'inline-block', 'vertical-align': 'top'}),
+
+            # Parameters display column
+            html.Div([
+                html.H3("Calculated Parameters:"),
+                html.Pre(id='double-barrel-parameter-display')
+            ], style={'width': '25%', 'display': 'inline-block', 'vertical-align': 'top', 'margin-left': '10px'})
+        ], style={'display': 'flex', 'justify-content': 'space-between'})
+    ])
+
 def create_parameters_display(r, n, m, omega, theta, s, alpha, h, total_width, total_height):
     return html.Div([
         html.H3("Pattern Parameters", style={'marginBottom': '20px'}),

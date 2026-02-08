@@ -1,0 +1,17 @@
+{
+  "colors": {
+    "fold_color_1": "rgb(0,255,0)",
+    "fold_color_2": "rgb(255,0,0)",
+    "radial_color": "rgb(0,0,255)"
+  },
+  "line_widths": {
+    "fold_width": 1.5,
+    "radial_width": 1.5
+  },
+  "line_styles": {
+    "radial_line_style": "solid"
+  },
+  "general": {
+    "rounding_decimal": 4
+  }
+}

@@ -18,6 +18,7 @@ def create_app():
     from .callbacks import register_callbacks
     from .layout import (
         create_barrel_vault_layout,
+        create_double_barrel_vault_layout,
         create_landing_layout,
         create_pseudo_dome_layout,
     )
@@ -36,6 +37,8 @@ def create_app():
             return create_pseudo_dome_layout()
         elif pathname == '/barrel-vault':
             return create_barrel_vault_layout()
+        elif pathname == '/double-barrel-vault':
+            return create_double_barrel_vault_layout()
         else:
             return create_landing_layout()
 

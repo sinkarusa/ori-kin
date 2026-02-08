@@ -6,17 +6,29 @@ from dash.exceptions import PreventUpdate
 from dash import callback_context
 
 from .layout import format_parameters
-from .utils.barrel_vault import generate_barrel_vault_pattern
+from .utils.barrel_vault_single import generate_barrel_vault_pattern
+from .utils.barrel_vault_double import generate_double_barrel_vault_pattern
 from .utils.calculations import (
     calculate_folding_angle,
     calculate_height,
     calculate_parameters,
     calculate_segment_angle,
     calculate_segment_length,
+    calculate_alpha1_angle,
+    calculate_alpha2_angle,
+    calculate_beta_angle
 )
-from .utils.export import create_dxf, create_svg, create_barrel_vault_svg, create_barrel_vault_dxf
+from .utils.export import (
+    create_dxf, create_svg,
+    create_barrel_vault_svg, create_barrel_vault_dxf,
+    create_double_barrel_vault_svg, create_double_barrel_vault_dxf
+)
 from .utils.pattern_generator import generate_pattern
-from .utils.config_loader import get_pseudo_dome_config, get_barrel_vault_config
+from .utils.config_loader import (
+    get_pseudo_dome_config,
+    get_barrel_vault_config,
+    get_double_barrel_vault_config
+)
 
 
 def register_pseudo_dome_callbacks(app):
@@ -295,7 +307,156 @@ def register_barrel_vault_callbacks(app):
         
         return {'data': traces, 'layout': layout}, parameters_text, barrel_height_label, h_clamped
 
-   
+
+
+def register_double_barrel_vault_callbacks(app):
+    # Help modal callbacks
+    @app.callback(
+        Output("double-barrel-help-modal", "is_open"),
+        [Input("double-barrel-radius-help-button", "n_clicks"),
+         Input("double-barrel-segments-help-button", "n_clicks"),
+         Input("double-barrel-tiles-help-button", "n_clicks"),
+         Input("double-barrel-distance-help-button", "n_clicks"),
+         Input("double-barrel-omega-help-button", "n_clicks"),
+         Input("double-barrel-close-help-modal", "n_clicks")],
+        [State("double-barrel-help-modal", "is_open")],
+    )
+    def toggle_double_barrel_help_modal(radius_help_clicks, segments_help_clicks, tiles_help_clicks,
+                               distance_help_clicks, omega_help_clicks, close_clicks, is_open):
+        ctx = callback_context
+        if not ctx.triggered:
+            return is_open
+        else:
+            button_id = ctx.triggered[0]['prop_id'].split('.')[0]
+            help_buttons = [
+                "double-barrel-radius-help-button",
+                "double-barrel-segments-help-button",
+                "double-barrel-tiles-help-button",
+                "double-barrel-distance-help-button",
+                "double-barrel-omega-help-button"
+            ]
+            if button_id in help_buttons and not is_open:
+                return True
+            elif button_id == "double-barrel-close-help-modal" and is_open:
+                return False
+            return is_open
+
+    # SVG Export callback
+    @app.callback(
+        Output("double-barrel-download-svg", "data"),
+        [Input("double-barrel-export-button", "n_clicks")],
+        [State('double-barrel-radius-input', 'value'),
+        State('double-barrel-segments-input', 'value'),
+        State('double-barrel-tiles-input', 'value'),
+        State('double-barrel-omega-input', 'value'),
+        State('double-barrel-distance-input', 'value'),
+        State('double-barrel-fold-color-1-input', 'value'),
+        State('double-barrel-fold-color-2-input', 'value'),
+        State('double-barrel-connection-color-input', 'value'),
+        State('double-barrel-fold-width-input', 'value'),
+        State('double-barrel-connection-width-input', 'value')],
+        prevent_initial_call=True
+    )
+    def export_double_barrel_vault_svg(n_clicks, r, n, m, omega, a, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width):
+        # Use values from YAML configuration
+        config = get_double_barrel_vault_config()
+        if n_clicks == 0:
+            raise PreventUpdate
+
+        svg_string = create_double_barrel_vault_svg(r, n, m, omega, a, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width)
+        return dict(content=svg_string, filename="double_barrel_vault_pattern.svg")
+
+    # DXF Export callback
+    @app.callback(
+        Output("double-barrel-download-dxf", "data"),
+        [Input("double-barrel-export-dxf-button", "n_clicks")],
+        [State('double-barrel-radius-input', 'value'),
+        State('double-barrel-segments-input', 'value'),
+        State('double-barrel-tiles-input', 'value'),
+        State('double-barrel-omega-input', 'value'),
+        State('double-barrel-distance-input', 'value'),
+        State('double-barrel-fold-color-1-input', 'value'),
+        State('double-barrel-fold-color-2-input', 'value'),
+        State('double-barrel-connection-color-input', 'value'),
+        State('double-barrel-fold-width-input', 'value'),
+        State('double-barrel-connection-width-input', 'value')],
+        prevent_initial_call=True
+    )
+    def export_double_barrel_vault_dxf(n_clicks, r, n, m, omega, a, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width):
+        # Use values from YAML configuration
+        config = get_double_barrel_vault_config()
+        if n_clicks == 0:
+            raise PreventUpdate
+
+        dxf_base64 = create_double_barrel_vault_dxf(r, n, m, omega, a, fold_color_1, fold_color_2, connecting_color, mv_width, connecting_width)
+        return dict(content=dxf_base64, filename="double_barrel_vault_pattern.dxf", type="application/dxf", base64=True)
+
+    @app.callback(
+        [Output('double-barrel-pattern-plot', 'figure'),
+        Output('double-barrel-parameter-display', 'children')],
+        [Input('double-barrel-radius-input', 'value'),
+        Input('double-barrel-segments-input', 'value'),
+        Input('double-barrel-tiles-input', 'value'),
+        Input('double-barrel-omega-input', 'value'),
+        Input('double-barrel-distance-input', 'value')]
+    )
+    def update_double_barrel_vault_pattern(r, n, m, omega, a):
+        # Calculate parameters
+        theta = calculate_segment_angle(omega, n)
+        s = calculate_segment_length(r, theta)
+
+        # Calculate double barrel vault specific parameters
+        alpha1 = calculate_alpha1_angle(a,r,n)
+        beta = calculate_beta_angle(a,r,n)
+        alpha2 = calculate_alpha2_angle(beta)
+        h = calculate_height(s, alpha1)
+
+        total_width = n * s
+        total_height = 2 * h
+
+        # Generate pattern
+        traces = generate_double_barrel_vault_pattern(r, n, m, omega, a)
+
+        # Format parameters display - with separate alpha1 and alpha2
+        parameters_text = f"""
+Radius (r): {r:.2f}
+Segments (n): {n}
+Tiles (m): {m}
+Central angle (Ω): {omega:.2f}°
+Distance between centers (a): {a:.2f}
+
+Calculated Parameters:
+Segment angle (θ): {theta:.2f}°
+Segment length (s): {s:.2f}
+Folding angle α₁: {alpha1:.2f}°
+Folding angle α₂: {alpha2:.2f}°
+Angle β: {beta:.2f}°
+Height (h): {h:.2f}
+
+Pattern Properties:
+Total Width: {total_width:.2f}
+Total Height: {total_height:.2f}
+"""
+
+        layout = go.Layout(
+            margin=dict(l=40, r=40, t=40, b=40),
+            xaxis=dict(
+                scaleanchor="y",
+                scaleratio=1,
+                range=[-h, total_width + h]
+            ),
+            yaxis=dict(
+                scaleanchor="x",
+                scaleratio=1,
+                range=[-total_height/2 - h/2, total_height/2 + h]
+            ),
+            showlegend=False
+        )
+
+        return {'data': traces, 'layout': layout}, parameters_text
+
+
 def register_callbacks(app):
     register_pseudo_dome_callbacks(app)
     register_barrel_vault_callbacks(app)
+    register_double_barrel_vault_callbacks(app)

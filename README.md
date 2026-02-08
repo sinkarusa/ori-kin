@@ -12,6 +12,7 @@ A web application for generating Pseudo-Dome and Barrel Vault patterns with cust
 - Export to SVG and DXF formats
 - Real-time visualization
 - Detailed parameter calculations
+- TypeScript/JavaScript implementation for browser-based usage (`web-app/`)
 
 ## Demo
 

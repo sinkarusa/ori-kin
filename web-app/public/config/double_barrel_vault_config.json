@@ -1,0 +1,17 @@
+{
+  "colors": {
+    "fold_color_1": "rgb(255,0,0)",
+    "fold_color_2": "rgb(0,0,255)",
+    "connecting_color": "black"
+  },
+  "line_widths": {
+    "fold_width": 1.5,
+    "connecting_width": 1.5
+  },
+  "line_styles": {
+    "connecting_line_style": "solid"
+  },
+  "general": {
+    "rounding_decimal": 4
+  }
+}
