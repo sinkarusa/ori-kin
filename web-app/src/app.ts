@@ -363,25 +363,25 @@ function renderLandingPage(container: HTMLElement): void {
       <h1>ORI-KIN</h1>
       <div class="pattern-cards">
         <div class="pattern-card" data-route="/pseudo-dome">
-          <img src="/assets/pseudo_dome.png" alt="Pseudo-Dome" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22180%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22180%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>Pseudo-Dome</text></svg>'">
+          <img src="assets/pseudo_dome.png" alt="Pseudo-Dome" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22180%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22180%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>Pseudo-Dome</text></svg>'">
           <h3>Pseudo-Dome</h3>
         </div>
         <div class="pattern-card" data-route="/barrel-vault">
-          <img src="/assets/single_center_barrel_vault.png" alt="Single-center Barrel Vault" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22180%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22180%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>Single Barrel Vault</text></svg>'">
+          <img src="assets/single_center_barrel_vault.png" alt="Single-center Barrel Vault" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22180%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22180%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>Single Barrel Vault</text></svg>'">
           <h3>Single-center Barrel Vault</h3>
         </div>
         <div class="pattern-card" data-route="/double-barrel-vault">
-          <img src="/assets/double_center_barrel_vault.png" alt="Double-center Barrel Vault" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22180%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22180%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>Double Barrel Vault</text></svg>'">
+          <img src="assets/double_center_barrel_vault.png" alt="Double-center Barrel Vault" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22180%22><rect fill=%22%23f0f0f0%22 width=%22200%22 height=%22180%22/><text x=%2250%%22 y=%2250%%22 dominant-baseline=%22middle%22 text-anchor=%22middle%22>Double Barrel Vault</text></svg>'">
           <h3>Double-center Barrel Vault</h3>
         </div>
       </div>
       <div class="footer">
         <p>
-          Copyright © 2024-2025
+          Copyright © 2024-2026
           <a href="https://askk-arch.com.tr" target="_blank">Andrée Sonad Karaveli Kartal</a>,
           <a href="https://github.com/sinkarusa" target="_blank">Sinan Karaveli</a>
           <a href="https://github.com/sinkarusa/ori-kin" target="_blank" class="github-link">
-            <img src="/assets/github-mark.png" alt="GitHub" class="github-icon" onerror="this.style.display='none'">
+            <img src="assets/github-mark.png" alt="GitHub" class="github-icon" onerror="this.style.display='none'">
           </a>
         </p>
       </div>
@@ -480,7 +480,7 @@ function renderPseudoDomeControls(container: HTMLElement): void {
     btn.addEventListener('click', () => {
       const modal = container.querySelector('#help-modal') as HTMLElement;
       const modalBody = container.querySelector('#modal-body') as HTMLElement;
-      modalBody.innerHTML = `<img src="/assets/dome_information_panel.png" alt="Information" onerror="this.outerHTML='<p>Information panel image not available</p>'">`;
+      modalBody.innerHTML = `<img src="assets/dome_information_panel.png" alt="Information" onerror="this.outerHTML='<p>Information panel image not available</p>'">`;
       modal.classList.add('active');
     });
   });
@@ -582,7 +582,7 @@ function renderBarrelVaultControls(container: HTMLElement, isDouble: boolean): v
     btn.addEventListener('click', () => {
       const modal = container.querySelector('#help-modal') as HTMLElement;
       const modalBody = container.querySelector('#modal-body') as HTMLElement;
-      modalBody.innerHTML = `<img src="/assets/${helpImg}" alt="Information" onerror="this.outerHTML='<p>Information panel image not available</p>'">`;
+      modalBody.innerHTML = `<img src="assets/${helpImg}" alt="Information" onerror="this.outerHTML='<p>Information panel image not available</p>'">`;
       modal.classList.add('active');
     });
   });

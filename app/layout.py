@@ -46,7 +46,7 @@ def create_landing_layout():
         # Footer with copyright and GitHub link
         html.Div([
             html.P([
-                "Copyright (C) [2024-2025] ",
+                "Copyright (C) [2024-2026] ",
                 html.A("Andrée Sonad Karaveli Kartal", href="https://askk-arch.com.tr", target="_blank"),
                 ", ",
                 html.A("Sinan Karaveli", href="https://github.com/sinkarusa", target="_blank"),

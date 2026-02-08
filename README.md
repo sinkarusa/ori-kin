@@ -112,7 +112,7 @@ The application is configured for deployment on Render.com using Poetry and Guni
 
 This project is licensed under the GNU General Public License v3.0 - see the [COPYING](COPYING) file for details.
 
-Copyright (C) [2024-2025] [Andrée Sonad Karaveli Kartal](https://askk-arch.com.tr), [Sinan Karaveli](https://github.com/sinkarusa)
+Copyright (C) [2024-2026] [Andrée Sonad Karaveli Kartal](https://askk-arch.com.tr), [Sinan Karaveli](https://github.com/sinkarusa)
 
 
 
