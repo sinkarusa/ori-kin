@@ -401,8 +401,13 @@ def register_double_barrel_vault_callbacks(app):
         Input('double-barrel-distance-input', 'value')]
     )
     def update_double_barrel_vault_pattern(r, n, m, omega, a):
-        # Calculate parameters
-        theta = calculate_segment_angle(omega, n)
+        if (r is None or n is None or m is None or a is None or
+                r <= 0 or n < 2 or m < 1 or a < 0 or a >= 2 * r or
+                int(n) != n or int(m) != m):
+            return {'data': [], 'layout': go.Layout()}, (
+                'Invalid geometry: require r > 0, 0 ≤ a < 2r, at least 2 segments per arc, and a positive integer tile count.'
+            )
+        theta = np.degrees(np.arccos(a / (2 * r))) / n
         s = calculate_segment_length(r, theta)
 
         # Calculate double barrel vault specific parameters
@@ -411,8 +416,8 @@ def register_double_barrel_vault_callbacks(app):
         alpha2 = calculate_alpha2_angle(beta)
         h = calculate_height(s, alpha1)
 
-        total_width = n * s
-        total_height = 2 * h
+        total_width = 2 * n * s
+        total_height = 4 * h * (2 * m - 1)
 
         # Generate pattern
         traces = generate_double_barrel_vault_pattern(r, n, m, omega, a)
@@ -420,9 +425,8 @@ def register_double_barrel_vault_callbacks(app):
         # Format parameters display - with separate alpha1 and alpha2
         parameters_text = f"""
 Radius (r): {r:.2f}
-Segments (n): {n}
+Segments per arc (n): {n} ({2 * n} total)
 Tiles (m): {m}
-Central angle (Ω): {omega:.2f}°
 Distance between centers (a): {a:.2f}
 
 Calculated Parameters:

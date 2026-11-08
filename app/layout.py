@@ -347,7 +347,7 @@ def create_double_barrel_vault_layout():
                 ], style={'margin-bottom': '15px'}),
                 html.Div([
                     html.Div([
-                        html.Label("Number of segments (n):", style={'font-weight': 'bold', 'display': 'inline-block'}),
+                        html.Label("Segments per arc (n):", style={'font-weight': 'bold', 'display': 'inline-block'}),
                         html.Button(
                             html.I(className="fas fa-question-circle", style={'font-size': '16px'}),
                             id="double-barrel-segments-help-button",
@@ -362,7 +362,7 @@ def create_double_barrel_vault_layout():
                             }
                         ),
                     ], style={'margin-bottom': '5px'}),
-                    dcc.Input(id='double-barrel-segments-input', type='number', value=6, min=3, max=20, step=1,
+                    dcc.Input(id='double-barrel-segments-input', type='number', value=6, min=2, max=20, step=1,
                              style={'width': '100%', 'margin-bottom': '5px'})
                 ], style={'margin-bottom': '15px'}),
                 html.Div([
@@ -424,7 +424,7 @@ def create_double_barrel_vault_layout():
                     ], style={'margin-bottom': '5px'}),
                     dcc.Input(id='double-barrel-omega-input', type='number', value=180, min=1, max=360, step=1,
                              style={'width': '100%', 'margin-bottom': '5px'})
-                ], style={'margin-bottom': '20px'}),
+                ], style={'display': 'none'}),
                 # Hidden inputs for configuration values (loaded from YAML)
                 html.Div([
                     dcc.Input(id='double-barrel-fold-color-1-input', type='hidden', value=''),

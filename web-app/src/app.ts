@@ -535,10 +535,10 @@ function renderBarrelVaultControls(container: HTMLElement, isDouble: boolean): v
     </div>
     <div class="control-group">
       <div class="control-label">
-        Segments (n):
+        ${isDouble ? 'Segments per arc (n)' : 'Segments (n)'}:
         <button class="help-button" data-help="segments">?</button>
       </div>
-      <input type="number" id="segments-input" value="6" min="3" max="20" step="1">
+      <input type="number" id="segments-input" value="6" min="${isDouble ? 2 : 3}" max="20" step="1">
     </div>
     <div class="control-group">
       <div class="control-label">
@@ -547,7 +547,7 @@ function renderBarrelVaultControls(container: HTMLElement, isDouble: boolean): v
       </div>
       <input type="number" id="tiles-input" value="1" min="1" max="20" step="1">
     </div>
-    <div class="control-group">
+    <div class="control-group" ${isDouble ? 'hidden' : ''}>
       <div class="control-label">
         Omega (°):
         <button class="help-button" data-help="omega">?</button>
@@ -595,18 +595,22 @@ function renderBarrelVaultControls(container: HTMLElement, isDouble: boolean): v
   const exportBtn = container.querySelector('#export-svg') as HTMLButtonElement;
 
   const updatePattern = async () => {
-    const r = parseFloat(radiusInput.value) || 2;
-    const n = parseInt(segmentsInput.value) || 6;
-    const m = parseInt(tilesInput.value) || 1;
+    const r = isDouble ? (Number.isNaN(parseFloat(radiusInput.value)) ? 2 : parseFloat(radiusInput.value)) : parseFloat(radiusInput.value) || 2;
+    const n = isDouble ? (Number.isNaN(Number(segmentsInput.value)) || segmentsInput.value === '' ? 6 : Number(segmentsInput.value)) : parseInt(segmentsInput.value) || 6;
+    const m = isDouble ? (Number.isNaN(Number(tilesInput.value)) || tilesInput.value === '' ? 1 : Number(tilesInput.value)) : parseInt(tilesInput.value) || 1;
     const omega = parseFloat(omegaInput.value) || 180;
 
     try {
       if (isDouble) {
         const distanceInput = container.querySelector('#distance-input') as HTMLInputElement;
-        const a = parseFloat(distanceInput?.value) || 1;
+        const a = Number.isNaN(parseFloat(distanceInput.value)) ? 1 : parseFloat(distanceInput.value);
+        if (r <= 0 || a < 0 || a >= 2 * r || !Number.isInteger(n) || !Number.isInteger(m) || n < 2 || m < 1) {
+          throw new Error('Require r > 0, 0 ≤ a < 2r, at least 2 segments per arc, and a positive integer tile count.');
+        }
         const traces = await generateDoubleBarrelVaultPattern(r, n, m, omega, a);
+        exportBtn.disabled = false;
         plotTraces(traces, 'Double Barrel Vault Pattern');
-        updateDoubleBarrelVaultParameters(r, n, m, omega, a, container);
+        await updateDoubleBarrelVaultParameters(r, n, m, a, container);
       } else {
         const heightInput = container.querySelector('#height-input') as HTMLInputElement;
         const hMaxEl = container.querySelector('#h-max') as HTMLElement;
@@ -629,6 +633,13 @@ function renderBarrelVaultControls(container: HTMLElement, isDouble: boolean): v
       }
     } catch (err) {
       console.error('Error generating pattern:', err);
+      if (isDouble) {
+        const display = container.querySelector('#parameter-display') as HTMLElement;
+        display.textContent = `Invalid geometry: ${err instanceof Error ? err.message : String(err)}`;
+        const plot = document.getElementById('plot-container');
+        if (plot) Plotly.purge(plot);
+        exportBtn.disabled = true;
+      }
     }
   };
 
@@ -652,7 +663,7 @@ function renderBarrelVaultControls(container: HTMLElement, isDouble: boolean): v
 
     if (isDouble) {
       const distanceInput = container.querySelector('#distance-input') as HTMLInputElement;
-      const a = parseFloat(distanceInput?.value) || 1;
+      const a = Number.isNaN(parseFloat(distanceInput.value)) ? 1 : parseFloat(distanceInput.value);
       const svg = await createDoubleBarrelVaultSvg(r, n, m, omega, a);
       saveSvgToFile(svg, `double_barrel_vault_r${r}_n${n}_m${m}_o${omega}_a${a}.svg`);
     } else {
@@ -779,16 +790,16 @@ function updateBarrelVaultParameters(r: number, n: number, m: number, omega: num
 /**
  * Update double barrel vault parameter display
  */
-async function updateDoubleBarrelVaultParameters(r: number, n: number, m: number, omega: number, a: number, container: HTMLElement): Promise<void> {
+async function updateDoubleBarrelVaultParameters(r: number, n: number, m: number, a: number, container: HTMLElement): Promise<void> {
   const { calculateAlpha1Angle, calculateAlpha2Angle, calculateBetaAngle } = await import('./utils/calculations');
-  const theta = calculateSegmentAngle(omega, n);
+  const theta = Math.acos(a / (2 * r)) * 180 / Math.PI / n;
   const s = calculateSegmentLength(r, theta);
   const alpha1 = calculateAlpha1Angle(a, r, n);
   const beta = calculateBetaAngle(a, r, n);
   const alpha2 = calculateAlpha2Angle(beta);
   const h = calculateHeight(s, alpha1);
-  const totalWidth = n * s;
-  const totalHeight = h * (2 * m - 1);
+  const totalWidth = 2 * n * s;
+  const totalHeight = 4 * h * (2 * m - 1);
 
   const display = container.querySelector('#parameter-display') as HTMLElement;
   display.innerHTML = `
@@ -796,9 +807,8 @@ async function updateDoubleBarrelVaultParameters(r: number, n: number, m: number
     <div class="parameter-section">
       <h4>Input Parameters</h4>
       <div class="parameter-row"><span class="parameter-label">Radius (r):</span><span class="parameter-value">${r.toFixed(2)}</span></div>
-      <div class="parameter-row"><span class="parameter-label">Segments (n):</span><span class="parameter-value">${n}</span></div>
+      <div class="parameter-row"><span class="parameter-label">Segments per arc (n):</span><span class="parameter-value">${n} (${2 * n} total)</span></div>
       <div class="parameter-row"><span class="parameter-label">Tiles (m):</span><span class="parameter-value">${m}</span></div>
-      <div class="parameter-row"><span class="parameter-label">Omega (Ω):</span><span class="parameter-value">${omega.toFixed(2)}°</span></div>
       <div class="parameter-row"><span class="parameter-label">Distance (a):</span><span class="parameter-value">${a.toFixed(2)}</span></div>
     </div>
     <div class="parameter-section">

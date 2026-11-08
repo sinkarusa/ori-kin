@@ -1,428 +1,97 @@
-/**
- * Double Barrel Vault Pattern Generator
- */
-
-import { getDoubleBarrelVaultConfig, DoubleBarrelVaultConfig } from './configLoader';
-import {
-  calculateSegmentAngle,
-  calculateHeight,
-  calculateSegmentLength,
-  calculateAlpha1Angle,
-  calculateAlpha2Angle,
-  calculateBetaAngle
-} from './calculations';
+import { getDoubleBarrelVaultConfig } from './configLoader';
+import { calculateHeight, calculateSegmentLength, calculateAlpha1Angle, calculateAlpha2Angle, calculateBetaAngle } from './calculations';
 import { ScatterTrace } from './pattern_generator';
-import { removeDuplicateTraces, ROUNDING_DECIMAL } from './common';
+import { removeDuplicateTraces } from './common';
 
-/**
- * Generate double barrel vault pattern
- *
- * @param r - Radius
- * @param n - Number of segments
- * @param m - Number of tiles
- * @param omega - Central angle
- * @param a - Distance between barrel vault centers
- * @param options - Optional configuration overrides
- * @returns Array of scatter traces for plotting
- */
+type Options = {
+  fold_color_1?: string;
+  fold_color_2?: string;
+  connecting_color?: string;
+  fold_width?: number;
+  connecting_width?: number;
+};
+
+/** n is the number of segments per arc. omega is retained for API compatibility:
+ * the double-centered arch's angle is determined by a and r, not by omega. */
 export async function generateDoubleBarrelVaultPattern(
-  r: number,
-  n: number,
-  m: number,
-  omega: number,
-  a: number,
-  options?: {
-    fold_color_1?: string;
-    fold_color_2?: string;
-    connecting_color?: string;
-    fold_width?: number;
-    connecting_width?: number;
-  }
+  r: number, n: number, m: number, omega: number, a: number, options?: Options
 ): Promise<ScatterTrace[]> {
-  // Load configuration
-  const config = await getDoubleBarrelVaultConfig();
-
-  // Use provided values or defaults from config
-  const fold_color_1 = options?.fold_color_1 || config.colors.fold_color_1;
-  const fold_color_2 = options?.fold_color_2 || config.colors.fold_color_2;
-  const connecting_color = options?.connecting_color || config.colors.connecting_color;
-  const fold_width = options?.fold_width || config.line_widths.fold_width;
-  const connecting_width = options?.connecting_width || config.line_widths.connecting_width;
-  const rounding_decimal = config.general.rounding_decimal;
-
-  // Calculate basic parameters
-  const theta = calculateSegmentAngle(omega, n);
-  const s = calculateSegmentLength(r, theta);
+  if (!Number.isFinite(r) || r <= 0 || !Number.isFinite(a) || a < 0 || a >= 2 * r ||
+      !Number.isInteger(n) || n < 2 || !Number.isInteger(m) || m < 1) {
+    throw new Error('Double barrel vault requires r > 0, 0 ≤ a < 2r, at least 2 segments per arc, and a positive integer m.');
+  }
+  void omega;
   const alpha1 = calculateAlpha1Angle(a, r, n);
   const beta = calculateBetaAngle(a, r, n);
   const alpha2 = calculateAlpha2Angle(beta);
-  const h = calculateHeight(s, alpha1); // Calculate h from geometry
-
-  const [unit_cell_traces, hl_pos, total_length] = await generateDoubleBarrelVaultUnitCell(
-    s, n, h, alpha1, alpha2, beta, a,
-    {
-      fold_color_1,
-      fold_color_2,
-      connecting_color,
-      fold_width,
-      connecting_width
+  const s = calculateSegmentLength(r, 2 * alpha1);
+  const h = Math.min(calculateHeight(s, alpha1), calculateHeight(s, alpha2));
+  const [cell, , width] = await generateDoubleBarrelVaultUnitCell(s, 2 * n, h, alpha1, alpha2, beta, a, options);
+  const config = await getDoubleBarrelVaultConfig();
+  const traces: ScatterTrace[] = [];
+  for (let i = -(m - 1); i <= m - 1; i++) {
+    for (const trace of cell) {
+      traces.push({ ...trace, x: [...trace.x], y: trace.y.map(y => y + 4 * h * i) });
     }
+  }
+  const bottom = -2 * h * (2 * m - 1);
+  const top = -bottom;
+  const result = removeDuplicateTraces(traces, config.general.rounding_decimal).filter(trace =>
+    !(trace.y.length === 2 && Math.abs(trace.y[0] - trace.y[1]) < 1e-9 &&
+      (Math.abs(trace.y[0] - bottom) < 1e-9 || Math.abs(trace.y[0] - top) < 1e-9))
   );
-
-  let full_traces: ScatterTrace[] = [...unit_cell_traces];
-
-  // Generate repeated patterns
-  for (let i = 1; i < m; i++) {
-    for (const trace of unit_cell_traces) {
-      const x = [...trace.x];
-      const y = [...trace.y];
-
-      // Translate up
-      const y_translated_up = y.map(yVal => yVal + 4 * h * i);
-      full_traces.push({
-        x: x,
-        y: y_translated_up,
-        mode: trace.mode,
-        line: trace.line ? { ...trace.line } : undefined,
-        marker: trace.marker ? { ...trace.marker } : undefined
-      });
-
-      // Translate down
-      const y_translated_down = y.map(yVal => yVal - 4 * h * i);
-      full_traces.push({
-        x: x,
-        y: y_translated_down,
-        mode: trace.mode,
-        line: trace.line ? { ...trace.line } : undefined,
-        marker: trace.marker ? { ...trace.marker } : undefined
-      });
-    }
-  }
-
-  // Remove duplicate traces
-  full_traces = removeDuplicateTraces(full_traces, rounding_decimal);
-
-  // Change color of top and bottom most horizontal traces
-  const y_bottom = hl_pos[0] * (2 * m - 1);
-  const y_top = hl_pos[hl_pos.length - 1] * (2 * m - 1);
-
-  // Remove all traces on top and bottom
-  const traces_final: ScatterTrace[] = [];
-
-  for (const trace of full_traces) {
-    if (trace.x.length === 2 && trace.y.length === 2) {
-      const y1 = trace.y[0];
-      const y2 = trace.y[1];
-
-      if ((Math.abs(y1 - y_bottom) < 0.001 && Math.abs(y2 - y_bottom) < 0.001) ||
-          (Math.abs(y1 - y_top) < 0.001 && Math.abs(y2 - y_top) < 0.001)) {
-        // Skip this trace, we'll add a special one instead
-        continue;
-      }
-
-      traces_final.push(trace);
-    } else {
-      traces_final.push(trace);
-    }
-  }
-
-  // Add horizontal traces at top and bottom
-  traces_final.push({
-    x: [0, total_length],
-    y: [y_bottom, y_bottom],
-    mode: 'lines',
-    line: { color: connecting_color, width: fold_width, dash: 'solid' }
+  for (const y of [bottom, top]) result.push({
+    x: [0, width], y: [y, y], mode: 'lines',
+    line: { color: options?.connecting_color ?? config.colors.connecting_color, width: options?.fold_width ?? config.line_widths.fold_width, dash: 'solid' }
   });
-
-  traces_final.push({
-    x: [0, total_length],
-    y: [y_top, y_top],
-    mode: 'lines',
-    line: { color: connecting_color, width: fold_width, dash: 'solid' }
-  });
-
-  return traces_final;
+  return result;
 }
 
-/**
- * Generate double barrel vault pattern unit cell
- *
- * @param s - Segment length
- * @param n - Number of segments
- * @param h - Height
- * @param alpha1 - First folding angle
- * @param alpha2 - Second folding angle
- * @param beta - Beta angle
- * @param a - Distance between centers
- * @param options - Optional configuration overrides
- * @returns [Array of scatter traces, Array of horizontal line positions, Total length]
- */
+/** Draw one cell. Here n is the total number of segments, with the apex at n/2. */
 export async function generateDoubleBarrelVaultUnitCell(
-  s: number,
-  n: number,
-  h: number,
-  alpha1: number,
-  alpha2: number,
-  beta: number,
-  a: number,
-  options?: {
-    fold_color_1?: string;
-    fold_color_2?: string;
-    connecting_color?: string;
-    fold_width?: number;
-    connecting_width?: number;
-  }
+  s: number, n: number, h: number, alpha1: number, alpha2: number, beta: number, a: number, options?: Options
 ): Promise<[ScatterTrace[], number[], number]> {
-  // Load configuration
+  void beta;
+  void a;
+  if (!Number.isInteger(n) || n < 4 || n % 2 !== 0 || !Number.isFinite(s) || s <= 0 ||
+      !Number.isFinite(h) || h <= 0 || !Number.isFinite(alpha1) || alpha1 <= 0 ||
+      !Number.isFinite(alpha2) || alpha2 <= 0) {
+    throw new Error('Invalid double barrel vault unit cell geometry.');
+  }
   const config = await getDoubleBarrelVaultConfig();
-
-  // Use provided values or defaults from config
-  const fold_color_1 = options?.fold_color_1 || config.colors.fold_color_1;
-  const fold_color_2 = options?.fold_color_2 || config.colors.fold_color_2;
-  const connecting_color = options?.connecting_color || config.colors.connecting_color;
-  const fold_width = options?.fold_width || config.line_widths.fold_width;
-  const connecting_width = options?.connecting_width || config.line_widths.connecting_width;
-  const connecting_line_style = config.line_styles.connecting_line_style;
-  const rounding_decimal = config.general.rounding_decimal;
-
+  const fold1 = options?.fold_color_1 ?? config.colors.fold_color_1;
+  const fold2 = options?.fold_color_2 ?? config.colors.fold_color_2;
+  const connecting = options?.connecting_color ?? config.colors.connecting_color;
+  const foldWidth = options?.fold_width ?? config.line_widths.fold_width;
+  const connectingWidth = options?.connecting_width ?? config.line_widths.connecting_width;
+  const width = n * s;
   const traces: ScatterTrace[] = [];
-
-  const s_angled_alpha1 = Math.abs(2 * h / Math.tan((Math.PI * alpha1) / 180));
-  const s_angled_alpha2 = Math.abs(2 * h / Math.tan((Math.PI * alpha2) / 180));
-
-  // Generate horizontal segment at the beginning
-  let current_x = 0;
-  let current_y = 0;
-  const first_flat_segment_length = s - s_angled_alpha1 / 2;
-  let next_x = current_x + first_flat_segment_length;
-  let next_y = current_y;
-
-  // Horizontal segment
-  traces.push({
-    x: [current_x, next_x],
-    y: [current_y, next_y],
-    mode: 'lines',
-    line: { color: fold_color_1, width: fold_width }
-  });
-
-  // Valley folds start and end points
-  const valley_fold_traces: [number, number][][] = [];
-  valley_fold_traces.push([[next_x, next_y]]);
-
-  const n_reps = n % 2 ? Math.floor(n / 2) : Math.floor(n / 2) - 1;
-  const current_x_sym_org = next_x;
-  const current_y_sym_org = next_y;
-
-  const valley_fold_color = fold_color_2;
-
-  // For both +y and -y directions
-  for (let j = 0; j < 2; j++) {
-    const y_dir = j === 0 ? 1 : -1;
-    current_x = current_x_sym_org;
-    current_y = current_y_sym_org;
-
-    // Center valley fold
-    const upper_and_lower_valley_fold_start: [number, number] = [0, y_dir * 2 * h];
-    let center_valley_fold_start: [number, number] = [0, 0];
-    let center_valley_fold_end: [number, number] = [0, 0];
-
-    for (let i = 0; i < n_reps; i++) {
-      if ((i + 1) % 2) {
-        // Odd iteration - use alpha1
-        next_x = current_x + s_angled_alpha1;
-        next_y = current_y + y_dir * 2 * h;
-        center_valley_fold_start = [current_x, current_y];
-
-        // Upper diagonal
-        traces.push({
-          x: [current_x, next_x],
-          y: [current_y, next_y],
-          mode: 'lines',
-          line: { color: fold_color_1, width: fold_width }
-        });
-        current_x = next_x;
-        current_y = next_y;
-
-        // Add upper valley fold
-        traces.push({
-          x: [upper_and_lower_valley_fold_start[0], next_x],
-          y: [upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
-          mode: 'lines',
-          line: { color: valley_fold_color, width: fold_width, dash: 'solid' }
-        });
-
-        next_x = current_x + s - s_angled_alpha1;
-        next_y = current_y;
-        if (next_x > current_x) {
-          // Trapezoid straight section
-          traces.push({
-            x: [current_x, next_x],
-            y: [current_y, next_y],
-            mode: 'lines',
-            line: { color: fold_color_1, width: fold_width }
-          });
-        }
-        upper_and_lower_valley_fold_start[0] = next_x;
-        upper_and_lower_valley_fold_start[1] = next_y;
-      } else {
-        // Even iteration - use alpha2
-        next_x = current_x + (s - s_angled_alpha2) / 2;
-        next_y = current_y;
-        // Trapezoid straight section
-        traces.push({
-          x: [current_x, next_x],
-          y: [current_y, next_y],
-          mode: 'lines',
-          line: { color: fold_color_1, width: fold_width }
-        });
-
-        current_x = next_x;
-        current_y = next_y;
-        center_valley_fold_start = [current_x, current_y];
-
-        next_x = current_x + s_angled_alpha2;
-        next_y = current_y + y_dir * 2 * h;
-        // Upper diagonal
-        traces.push({
-          x: [current_x, next_x],
-          y: [current_y, next_y],
-          mode: 'lines',
-          line: { color: fold_color_1, width: fold_width }
-        });
-        current_x = next_x;
-        current_y = next_y;
-
-        // Add upper valley fold
-        traces.push({
-          x: [upper_and_lower_valley_fold_start[0], next_x],
-          y: [upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
-          mode: 'lines',
-          line: { color: valley_fold_color, width: fold_width, dash: 'solid' }
-        });
-
-        next_x = current_x + (s - s_angled_alpha2) / 2;
-        next_y = current_y;
-        // Trapezoid straight section
-        traces.push({
-          x: [current_x, next_x],
-          y: [current_y, next_y],
-          mode: 'lines',
-          line: { color: fold_color_1, width: fold_width }
-        });
-        upper_and_lower_valley_fold_start[0] = next_x;
-        upper_and_lower_valley_fold_start[1] = next_y;
-      }
-
-      // Lower diagonal
-      current_x = next_x;
-      current_y = next_y;
-      next_x = current_x + s_angled_alpha1;
-      next_y = current_y - y_dir * 2 * h;
-      center_valley_fold_end = [next_x, next_y];
-      // Lower diagonal
-      traces.push({
-        x: [current_x, next_x],
-        y: [current_y, next_y],
-        mode: 'lines',
-        line: { color: fold_color_1, width: fold_width }
-      });
-      current_x = next_x;
-      current_y = next_y;
-
-      // Add center valley fold
-      traces.push({
-        x: [center_valley_fold_start[0], center_valley_fold_end[0]],
-        y: [center_valley_fold_start[1], center_valley_fold_end[1]],
-        mode: 'lines',
-        line: { color: valley_fold_color, width: fold_width, dash: 'solid' }
-      });
-
-      next_x = current_x + s - s_angled_alpha1;
-      next_y = current_y;
-
-      if ((n % 2 === 1) && (i === n_reps - 1)) {
-        next_x = current_x + first_flat_segment_length;
-      }
-
-      // Trapezoid straight section
-      traces.push({
-        x: [current_x, next_x],
-        y: [current_y, next_y],
-        mode: 'lines',
-        line: { color: fold_color_1, width: fold_width }
-      });
-      current_x = next_x;
-      current_y = next_y;
+  const line = (x1: number, y1: number, x2: number, y2: number, color: string, lineWidth: number, dash?: string) => {
+    if (Math.hypot(x2 - x1, y2 - y1) < 1e-10) return;
+    traces.push({ x: [x1, x2], y: [y1, y2], mode: 'lines', line: { color, width: lineWidth, ...(dash ? { dash } : {}) } });
+  };
+  const offsets = [alpha1, alpha2].map(alpha => 2 * h / Math.tan(alpha * Math.PI / 180));
+  if (offsets.some(d => !Number.isFinite(d) || d > s + 1e-9)) throw new Error('Row height causes intersecting creases.');
+  for (const direction of [1, -1]) {
+    let x = 0;
+    let y = 0;
+    const last = [0, 0];
+    for (let k = 1; k < n; k++) {
+      const d = offsets[k === n / 2 ? 1 : 0];
+      const left = k * s - d / 2;
+      const right = k * s + d / 2;
+      line(x, y, left, y, fold1, foldWidth);
+      const nextY = y === 0 ? direction * 2 * h : 0;
+      line(left, y, right, nextY, fold1, foldWidth);
+      line(last[nextY === 0 ? 0 : 1], nextY, right, nextY, fold2, foldWidth, 'solid');
+      last[y === 0 ? 0 : 1] = left;
+      x = right;
+      y = nextY;
     }
-
-    if (n % 2 === 0) {
-      // Then we do one diagonal step only
-      center_valley_fold_start[0] = current_x;
-      next_x = current_x + s_angled_alpha1;
-      next_y = current_y + y_dir * 2 * h;
-      // Upper diagonal
-      traces.push({
-        x: [current_x, next_x],
-        y: [current_y, next_y],
-        mode: 'lines',
-        line: { color: fold_color_1, width: fold_width }
-      });
-
-      current_x = next_x;
-      current_y = next_y;
-
-      next_x = current_x + s - s_angled_alpha1 / 2;
-      next_y = current_y;
-
-      // Trapezoid straight section
-      traces.push({
-        x: [current_x, next_x],
-        y: [current_y, next_y],
-        mode: 'lines',
-        line: { color: fold_color_1, width: fold_width }
-      });
-
-      traces.push({
-        x: [center_valley_fold_start[0], next_x],
-        y: [center_valley_fold_start[1], center_valley_fold_end[1]],
-        mode: 'lines',
-        line: { color: valley_fold_color, width: fold_width, dash: 'solid' }
-      });
-    }
-
-    // Add valley fold
-    traces.push({
-      x: [upper_and_lower_valley_fold_start[0], current_x],
-      y: [upper_and_lower_valley_fold_start[1], upper_and_lower_valley_fold_start[1]],
-      mode: 'lines',
-      line: { color: valley_fold_color, width: fold_width, dash: 'solid' }
-    });
+    line(x, y, width, y, fold1, foldWidth);
+    const otherY = y === 0 ? direction * 2 * h : 0;
+    line(last[otherY === 0 ? 0 : 1], otherY, width, otherY, fold2, foldWidth, 'solid');
   }
-
-  // Horizontal lines positions
-  const hl_pos = [-2 * h, 0, 2 * h];
-  const total_length = n * s;
-
-  // Vertical lines
-  const vl_pos = [0, total_length];
-  const min_hl = Math.min(...hl_pos);
-  const max_hl = Math.max(...hl_pos);
-
-  for (const vlp of vl_pos) {
-    traces.push({
-      x: [vlp, vlp],
-      y: [min_hl, max_hl],
-      mode: 'lines',
-      line: {
-        color: connecting_color,
-        width: connecting_width,
-        dash: connecting_line_style
-      }
-    });
-  }
-
-  // Remove duplicate traces
-  const unique_traces = removeDuplicateTraces(traces, rounding_decimal);
-
-  return [unique_traces, hl_pos, total_length];
+  for (const x of [0, width]) line(x, -2 * h, x, 2 * h, connecting, connectingWidth, config.line_styles.connecting_line_style);
+  return [removeDuplicateTraces(traces, config.general.rounding_decimal), [-2 * h, 0, 2 * h], width];
 }

@@ -55,15 +55,14 @@ def calculate_height(s, alpha):
     return np.tan(np.radians(alpha)) * (s/2)
 
 def calculate_alpha1_angle(a,r,n):
-    """Calculate double barrel vault's alpha1 angle using ASKK's equation from notes"""
+    """Ordinary folding angle, with n segments per arc (eqs. 3.52-3.59)."""
     return np.degrees(np.acos(a / (2*r))/(2*n))
 
 def calculate_alpha2_angle(beta):
-    """Calculate double barrel vault's alpha2 angle using ASKK's equation from notes"""
-    return (90 - beta)/2
+    """Apex folding angle from apex interior angle beta2 (eq. 3.60)."""
+    return (180 - beta)/2
 
 def calculate_beta_angle(a,r,n):
-    """Calculate double barrel vault's beta angle using ASKK's equation from notes"""
+    """Apex interior angle beta2 in degrees (eqs. 3.52-3.58)."""
     invcos_a2r = np.acos(a / (2*r)) 
     return np.degrees((2*invcos_a2r) - invcos_a2r/n) 
-        

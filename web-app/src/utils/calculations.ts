@@ -106,7 +106,8 @@ export function radiansToDegrees(radians: number): number {
 }
 
 /**
- * Calculate double barrel vault's alpha1 angle using ASKK's equation from notes
+ * Calculate α1 (thesis equations 3.52, 3.53 and 3.59).
+ * n is the number of segments per arc, as in the thesis.
  */
 export function calculateAlpha1Angle(a: number, r: number, n: number): number {
   return radiansToDegrees(Math.acos(a / (2 * r)) / (2 * n));
@@ -116,7 +117,7 @@ export function calculateAlpha1Angle(a: number, r: number, n: number): number {
  * Calculate double barrel vault's alpha2 angle using ASKK's equation from notes
  */
 export function calculateAlpha2Angle(beta: number): number {
-  return (90 - beta) / 2;
+  return (180 - beta) / 2;
 }
 
 /**
@@ -124,5 +125,5 @@ export function calculateAlpha2Angle(beta: number): number {
  */
 export function calculateBetaAngle(a: number, r: number, n: number): number {
   const invcos_a2r = Math.acos(a / (2 * r));
-  return radiansToDegrees((2 * invcos_a2r) - invcos_a2r / n);
+  return radiansToDegrees(2 * invcos_a2r - invcos_a2r / n);
 }
