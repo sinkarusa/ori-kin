@@ -1,0 +1,3 @@
+# Follow-up tasks
+
+- [ ] Investigate barrel-vault end boundaries against the thesis (sections 3.1 and 3.2, especially Figures 3.45 and 3.46). Both the single- and double-centered generators currently use straight vertical cut lines, while the thesis describes edge lines using the angle λ and illustrates sloped edges. Determine whether the current rectangular outline is intentional, how the thesis edges should be constructed for repeated rows, and whether changing them affects folding or fabrication. Compare odd and even segment counts and validate any proposed change in a 3D simulator. Also check whether the pseudo-dome has an analogous issue before assuming it needs the same treatment.
